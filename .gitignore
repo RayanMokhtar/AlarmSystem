@@ -1,0 +1,23 @@
+# Gradle
+.gradle/
+build/
+*.apk
+*.aab
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+local.properties
+
+# Python/venv
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+*.swp
+*.swo
