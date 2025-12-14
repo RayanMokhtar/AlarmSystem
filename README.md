@@ -60,3 +60,8 @@ Si tu changes le port (ex: 8090), adapte les URLs.
 - Le téléphone et le PC doivent être sur le même Wi‑Fi.
 - Windows Firewall peut bloquer le port 8080; autoriser Python/port si besoin.
 - La webcam du PC est ouverte uniquement quand au moins un client consulte `/video_feed` (elle se libère à la déconnexion du dernier client).
+
+
+
+commande : cd "C:\Users\darkf\Desktop\service caméra" # a changer 
+$env:PORT=8090; .\.venv\Scripts\python.exe webrtc_server.py
