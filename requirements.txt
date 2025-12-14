@@ -1,0 +1,5 @@
+flask==3.0.3
+opencv-python==4.10.0.84
+aiohttp==3.10.11
+aiortc==1.9.0
+av==12.3.0
