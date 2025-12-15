@@ -7,7 +7,8 @@ from uuid import UUID
 
 DB_HOST = "postgresql-hammal.alwaysdata.net"
 DB_NAME = "hammal_atelierrt"
-DB_USER = "hammal"
+DB_USER = "hammal"clear
+
 DB_PASS = "Zahrdin.99"
 
 app = FastAPI()
@@ -172,7 +173,7 @@ def insertion_evenement(evenement: Evenement):
             password=DB_PASS,
             cursor_factory=RealDictCursor
         )
-        
+
         cur = conn.cursor()
         cur.execute(
             """

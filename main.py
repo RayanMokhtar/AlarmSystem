@@ -18,11 +18,20 @@ def creer_utilisateur(data: CreationRequest):
         "equipement_id": str(equipement_id)
     }
 
-
 @app.post("/creerLieu")
 def create_lieu(data : Lieu):
     lieu_id = inserer_lieu(data)
     return {"status": "success", "utilisateur_id": lieu_id}
+
+@app.post("/creerAppareil")
+def create_lieu(data : Appareil):
+    appareil_id = inserer_appareil(data)
+    return {"status": "success", "appareil_id": appareil_id}
+
+@app.post("/creerEquipement")
+def create_equipement(data : Appareil):
+    equipement_id = inserer_equipement(data)
+    return {"status": "success", "equipement_id": equipement_id}
 
 @app.post("/creerEvenement")
 def create_evenement(evenement : Evenement):
