@@ -24,7 +24,7 @@ def create_lieu(data : Lieu):
     return {"status": "success", "utilisateur_id": lieu_id}
 
 @app.post("/creerAppareil")
-def create_lieu(data : Appareil):
+def create_appareil(data : Appareil):
     appareil_id = inserer_appareil(data)
     return {"status": "success", "appareil_id": appareil_id}
 
