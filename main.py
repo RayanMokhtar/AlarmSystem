@@ -37,6 +37,6 @@ def create_equipement(data : Appareil):
 def create_evenement(evenement : Evenement):
     evenement_id = insertion_evenement(evenement)
     return {"status": "success", "utilisateur_id": evenement_id}
-
+ 
 
     
