@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from Insertions import Appareil, CreationRequest, Equipement, Evenement, Lieu, Utilisateur, inserer_appareil, inserer_equipement, inserer_lieu, inserer_utilisateur, insertion_evenement
+from Insertions import Appareil, CreationRequest, Equipement, Evenement, Lieu, Notification, Utilisateur, inserer_appareil, inserer_equipement, inserer_lieu, inserer_notification, inserer_utilisateur, insertion_evenement
 
 app = FastAPI()
 
@@ -39,4 +39,7 @@ def create_evenement(evenement : Evenement):
     return {"status": "success", "utilisateur_id": evenement_id}
  
 
-    
+@app.post("/creerNotification")
+def create_notification(notif : Notification): 
+    notification_id= inserer_notification(notif)
+    return{"status": "success", "utilisateur_id": notification_id}

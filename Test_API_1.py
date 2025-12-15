@@ -3,11 +3,13 @@ from uuid import uuid4
 from datetime import date
 
 url = "http://127.0.0.1:8000/creerUtilisateur"
+url2 = "http://127.0.0.1:8000/creerNotification"
 
 utilisateur_id = str(uuid4())
 lieu_id = str(uuid4())
 appareil_id = str(uuid4())
 equipement_id = str(uuid4())
+notification_id = str(uuid4())
 
 data = {
     "utilisateur": {
@@ -41,6 +43,15 @@ data = {
     }
 }
 
-response = requests.post(url, json=data)
+data1 = {
+    "notification_id": notification_id, 
+    "utilisateur_id" : "401eb00d-20a3-43c0-9c79-07c82b13d6b4",
+    "evenement_id" : "e5338c49-af48-4f12-8cee-c64bb1c2d0f3",
+    "statut_notification" : True, 
+    "date_notification":str(date.today())
+
+}
+
+response = requests.post(url2, json=data1)
 print("Status code:", response.status_code)
 print("Response JSON:", response.json())

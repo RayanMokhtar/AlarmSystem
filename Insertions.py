@@ -7,8 +7,7 @@ from uuid import UUID
 
 DB_HOST = "postgresql-hammal.alwaysdata.net"
 DB_NAME = "hammal_atelierrt"
-DB_USER = "hammal"clear
-
+DB_USER = "hammal"
 DB_PASS = "Zahrdin.99"
 
 app = FastAPI()
@@ -59,6 +58,13 @@ class CreationRequest(BaseModel):
     lieu: Lieu
     appareil: Appareil
     equipement: Equipement
+
+class Notification(BaseModel):
+    notification_id: UUID
+    utilisateur_id: UUID
+    evenement_id: UUID
+    statut_notification: bool
+    date_notification: datetime
 
 def inserer_utilisateur(data: Utilisateur):
     try:
@@ -173,7 +179,7 @@ def insertion_evenement(evenement: Evenement):
             password=DB_PASS,
             cursor_factory=RealDictCursor
         )
-
+        
         cur = conn.cursor()
         cur.execute(
             """
@@ -204,6 +210,50 @@ def insertion_evenement(evenement: Evenement):
         cur.close()
         conn.close()
         return evenement_id
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def inserer_notification(data: Notification):
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASS,
+            cursor_factory=RealDictCursor
+        )
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            INSERT INTO notification (
+                notification_id,
+                utilisateur_id,
+                evenement_id,
+                statut_notification,
+                date_notification
+            )
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING notification_id
+            """,
+            (
+                str(data.notification_id),
+                str(data.utilisateur_id),
+                str(data.evenement_id),
+                data.statut_notification,
+                data.date_notification
+            )
+        )
+
+        notification_id = cur.fetchone()["notification_id"]
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return notification_id
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
