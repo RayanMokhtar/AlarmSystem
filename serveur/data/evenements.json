@@ -1,0 +1,34 @@
+{
+  "event_id": "evt_001",
+  "timestamp_raspberry": "2025-12-15T14:30:00Z",
+  "device_id": "raspi-01",
+  "data": {
+    "alerte_potentielle": true,
+
+    "equipements": {
+      "camera": {
+        "mode": "eco", 
+        "statut": "actif", 
+        "seuil": 0.65
+      },
+      "capteur_temperature": {
+        "mode": "seuil", 
+        "statut": "", 
+        "seuil": 50
+      },
+      "bouton": {
+        "mode": "manuel", 
+        "statut": "", 
+        "seuil": null
+      }
+    },
+
+    "image_b64": ".....",
+    "video_info": {
+      "nom_fichier": "evt_001.mp4",
+      "duree": 30,
+      "resolution": "1280x720", 
+      "fps": 15
+    }
+  }
+}
