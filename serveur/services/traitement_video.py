@@ -134,6 +134,15 @@ def seuillage_yolo(classes_counter: Dict[str,int] ,seuil_personnes = SEUIL_YOLO)
 
 
 
+
+def visualiser_video_yolo_service(video_bytes):
+    if video_bytes:
+        video_path = videos_bytes_to_file(video_bytes,lancer_video=False)
+        fichier_sortie_modele = get_video_annotee_yolo(video_path)
+        print("ficheir sortie",fichier_sortie_modele)
+        lancer_video(fichier_sortie_modele)
+
+
 def pipeline_traitement_video(videos_bytes : bytes , algorithme : Literal["YOLO","TI"]):
     video_path = videos_bytes_to_file(videos_bytes,lancer_video=False)
     model = YOLO_MODELE
@@ -141,6 +150,7 @@ def pipeline_traitement_video(videos_bytes : bytes , algorithme : Literal["YOLO"
         resultats_yield = traiter_video_avec_yolo(video_path,model)
         nbr_frames , compteur_classes , meilleures_detections_par_frame = agreger_stats_yolo(resultats_yield,model)
         dictionnaire_analyse = seuillage_yolo(compteur_classes)
+        print("dictionnaire_analyse",dictionnaire_analyse)
     else : 
         print("autre algo à développer")
         dictionnaire_analyse = {}
@@ -157,33 +167,9 @@ def pipeline_traitement_video(videos_bytes : bytes , algorithme : Literal["YOLO"
 
 
 
-def visualiser_video_yolo_service(video_bytes):
-    if video_bytes:
-        video_path = videos_bytes_to_file(video_bytes,lancer_video=False)
-        fichier_sortie_modele = get_video_annotee_yolo(video_path)
-        print("ficheir sortie",fichier_sortie_modele)
-        lancer_video(fichier_sortie_modele)
 
-
-
-
-
-def pipeline_traitement_data(image_bytes: bytes | None, video_bytes: bytes | None) -> dict :
+def pipeline_traitement_data(video_bytes: bytes) -> dict :
     result = {"image": None, "video": None}
-    if image_bytes is not None:
-        try:
-            image = Image.open(io.BytesIO(image_bytes))
-            image.show()
-            result["image"] = {
-                "format": image.format,
-                "size": image.size,
-                "mode": image.mode,
-                "taille_bytes": len(image_bytes)
-            }
-            image.close()
-        except Exception as e:
-            result["image"] = {"erreur": f"Impossible d'analyser l'image: {e}"}
-
     if video_bytes :
         resultat , video_path = pipeline_traitement_video(videos_bytes=video_bytes,algorithme="YOLO")
         return resultat , video_path

@@ -3,7 +3,7 @@ import uvicorn
 from serveur.routes.routes import router
 
 app = FastAPI(title="Alarm Server")
-app.include_router(router, prefix="/api")
+app.include_router(router, prefix="/api/serveur_calcul")
 
 
 def lancer_serveur() -> None:

@@ -2,8 +2,11 @@ from pathlib import Path
 import json
 import requests
 import datetime 
+from uuid import UUID
+
 from typing import Literal
 from pydantic import ValidationError
+from fastapi import HTTPException
 
 from serveur.configuration import CONFIG
 from serveur.services.utils import YOLO_MODELE , _sanitize_filename
@@ -23,24 +26,39 @@ def construire_event_data(donnes_raspberry : AlerteRaspberry , resultat:dict,vid
         "classes_yolo":compteur_classes or None
     }"""
 
-    #remarque si model_validate => Casting automatique fait
-    try  : 
+    d = resultat.get("dictionnaire_analyse", {})
+    try:
+        event_id = UUID(str(donnes_raspberry.event_id))
+        appareil_id = UUID(str(donnes_raspberry.device_id))
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"ID invalid: {e}") from e
+
+    nb_personnes = d.get("nombre_occurrence_personne", 0)
+    nb_frames = d.get("nombre_frames") or 1  
+    seuil = float(nb_personnes) / float(nb_frames)
+
+    statut_camera = (donnes_raspberry.data.equipements.camera.statut == "actif")
+    statut_capteur = (donnes_raspberry.data.equipements.capteur_temperature.statut == "actif")
+    statut_bouton = (donnes_raspberry.data.equipements.bouton.statut == "actif")
+    print("statut",statut_camera,statut_capteur,statut_bouton)
+
+    try : 
         event_publisher = EventDataPublisher(
-        event_id = donnes_raspberry.event_id,
-        appareil_id = donnes_raspberry.device_id,
-        timestamp_serveur = resultat.get("timestamp_serveur"),
-        statut_alerte = resultat.get("dictionnaire_analyse").get("statut_alerte"),
-        seuil_reponse_model = (resultat.get("dictionnaire_analyse").get("nombre_occurrence_personne") / resultat.get("dictionnaire_analyse").get("nombre_frames")), 
-        statut_raspberry = donnes_raspberry.data.equipements.alerte_potentielle,
-        statut_camera = donnes_raspberry.data.equipements.camera.statut,
-        statut_bouton = donnes_raspberry.data.equipements.bouton.statut,
-        statut_capteur = donnes_raspberry.data.equipements.capteure_temperature.statut,
-        video_path= video_path
+            evenement_id=event_id,
+            appareil_id=appareil_id,
+            timestamp_serveur=resultat.get("timestamp_serveur"),
+            statut_alerte=bool(d.get("statut_alerte", False)),
+            seuil_reponse_model=seuil,
+            statut_raspberry=donnes_raspberry.data.alerte_potentielle,
+            statut_camera=statut_camera,
+            statut_bouton=statut_bouton,
+            statut_capteur=statut_capteur,
+            emplacement_video_evenement=video_path,
         )
         return event_publisher
-    except ValidationError  as e : 
-        print("erreur de validation pydantic dans la construction de l'évenement : ", str(e))   
-        raise 
+    except Exception as e :
+        raise HTTPException(status_code=422, detail=str(e)) from e 
+
 
 
 def envoyer_cloud_data(event_data:EventDataPublisher,video_path:str):
@@ -48,7 +66,7 @@ def envoyer_cloud_data(event_data:EventDataPublisher,video_path:str):
     print("endpoint cloud = ",route_cloud)
     with open(video_path, "rb") as f:
         files = {"video": ("event.mp4", f, "video/mp4")}
-        data = {"metadata": json.dumps(event_data)}
+        data = {"evenement": json.dumps(event_data)}
         r = requests.post(url = route_cloud, files=files, data=data, timeout=120)
         r.raise_for_status()
         return r.json()
@@ -86,8 +104,21 @@ def envoyer_raspberry_data(resultat_prediction):
         "alerte_statut":resultat_prediction.get("dictionnaire_analyse").get("statut_alerte"),
         "algorithme": resultat_prediction.get("algorithme")
     }
+    endpoint_process_alerte = f"{CONFIG.serveur_raspberry.base_url}/process_alert"
     try :
-        response = requests.post(url = CONFIG.serveur_raspberry.base_url , json = data , timeout=10)
+        response = requests.post(url = endpoint_process_alerte, json = data , timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e :
+        print("erreur envoi serveur :", e)
+        return None
+
+
+
+def get_healthcheck_raspberry():
+    try :
+        url_rpi = f"{CONFIG.serveur_raspberry.base_url}/healthcheck"
+        response = requests.get(url = url_rpi , timeout=10)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e :

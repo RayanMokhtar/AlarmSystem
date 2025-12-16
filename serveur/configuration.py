@@ -8,7 +8,6 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 
 class PathConfig(BaseModel):
-
     data_dir: Path = Field(
         default=DATA_DIR,
         description="Répertoire de base absolu pour les données (Serveur/data)"
@@ -55,7 +54,7 @@ class YoloConfig(AIModelConfig):
 
 
 class ApiConfig(BaseModel):
-    host: str = Field(default="127.0.0.1", description="Adresse d'écoute api")
+    host: str = Field(default="0.0.0.0", description="Adresse d'écoute api")
     description: Optional[str] = Field(default=None, description="Description courte du service/API")
     port : str = Field(default="8000",description="port d'exposition de l'api")
 
@@ -71,7 +70,7 @@ class Configuration(BaseModel):
     path_config: PathConfig = Field(PathConfig(), description="Configuration des chemins")
     ai_config: YoloConfig = Field(YoloConfig(), description="Configuration du modèle AI YOLO")
     api_config: ApiConfig = Field(ApiConfig(), description="Config de l'API locale")
-    serveur_raspberry : ExternalApiConfig = Field(ExternalApiConfig(base_url="https://localhost:8500"), description="Config d'une API externe")
+    serveur_raspberry : ExternalApiConfig = Field(ExternalApiConfig(base_url="http://10.12.241.189:5000"), description="Config d'une API externe")
     serveur_cloud : ExternalApiConfig = Field(ExternalApiConfig(), description="Config du serveur cloud ")
 
 

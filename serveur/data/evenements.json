@@ -1,34 +1,15 @@
 {
-  "event_id": "evt_001",
-  "timestamp_raspberry": "2025-12-15T14:30:00Z",
-  "device_id": "raspi-01",
+  "event_id": "550e8400-e29b-41d4-a716-446655440000", 
+  "timestamp_raspberry": "2025-12-16T15:02:28.940Z",
+  "device_id": "550e8400-e29b-41d4-a716-446655440001", 
   "data": {
     "alerte_potentielle": true,
-
     "equipements": {
-      "camera": {
-        "mode": "eco", 
-        "statut": "actif", 
-        "seuil": 0.65
-      },
-      "capteur_temperature": {
-        "mode": "seuil", 
-        "statut": "", 
-        "seuil": 50
-      },
-      "bouton": {
-        "mode": "manuel", 
-        "statut": "", 
-        "seuil": null
-      }
+      "camera": { "mode": "eco", "statut": "actif", "seuil": 0.8 },
+      "capteur_temperature": { "mode": "seuil", "statut": "actif", "seuil": 0 },
+      "bouton": { "mode": "manuel", "statut": "actif", "seuil": null }
     },
-
-    "image_b64": ".....",
-    "video_info": {
-      "nom_fichier": "evt_001.mp4",
-      "duree": 30,
-      "resolution": "1280x720", 
-      "fps": 15
-    }
+    "image_b64": null,
+    "video_info": { "nom_fichier": "event.mp4", "duree": 10, "resolution": "640x480", "fps": 30 }
   }
 }
