@@ -3,7 +3,8 @@ from datetime import datetime
 import json
 
 from serveur.models.schemas import AlerteRaspberry
-from serveur.services.traitement_video import analyser_media , visualiser_video_yolo_service
+from serveur.services.traitement_video import pipeline_traitement_data , visualiser_video_yolo_service
+from serveur.services.event_publisher import envoyer_cloud_data , construire_event_data , envoyer_raspberry_data , stockage_local_evenement
 
 router = APIRouter()
 
@@ -25,8 +26,8 @@ async def visualiser_video_yolo(
 
 
 
-@router.post("/recevoir_potentielle_alerte")
-async def recevoir_potentielle_alerte(
+@router.post("/process/raspberry_alerte")
+async def process_raspberry_alerte(
     metadata_json: str = Form(...),                
     image: UploadFile | None = File(None),          
     video: UploadFile | None = File(None),          
@@ -43,14 +44,24 @@ async def recevoir_potentielle_alerte(
     image_bytes = await image.read() if image else None
     video_bytes = await video.read() if video else None
     
-    media_details = analyser_media(image_bytes, video_bytes)
-    print("medias ",media_details)
-    return {
-        "ok": True,
-        "event_id": metadata.event_id,
-        "alerte_potentielle": metadata.data.alerte_potentielle,
-        "image_recue": image is not None,
-        "video_recue": video is not None,
-        "image_content_type": None if image is None else image.content_type,
-        "video_content_type": None if video is None else video.content_type,
-    }
+    resultats_modele , video_path = pipeline_traitement_data(image_bytes, video_bytes)
+    print("reponse modele  ",resultats_modele)
+    vraie_alerte = resultats_modele.get("dictionnaire_analyse").get("statut_alerte")
+    if vraie_alerte : 
+        print("vraie alerte avérée par serveur calcul => envoi au cloud ")
+        #envoi au cloud + envoi à la raspberry puis stocage local 
+        print('construction event data ....')
+        event_data = construire_event_data(donnes_raspberry=metadata , resultat=resultats_modele ,video_path = video_path )
+        print("envoi données vers le cloud ...")
+        response = envoyer_cloud_data(event_data,video_path = video_path)
+        print("reponse json ... => ",  response)
+    print("log : insertion fichier en local")
+    emplacement_trace_locale = stockage_local_evenement(resultat= resultats_modele,data_raspi=metadata)
+    raspberry_data_reponse = envoyer_raspberry_data(resultats_modele)
+    return {"raspberry_data_reponse": raspberry_data_reponse, 
+            "emplacement_trace_locale":emplacement_trace_locale , 
+            "reponse_model":resultats_modele
+            }
+
+
+

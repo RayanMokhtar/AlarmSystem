@@ -1,6 +1,9 @@
 from datetime import datetime
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
+from datetime import datetime
+from pathlib import Path
+from uuid import UUID
 
 class CameraConfig(BaseModel):
     mode: Literal["eco", "surveillance"] = "eco"
@@ -39,3 +42,21 @@ class AlerteRaspberry(BaseModel):
     timestamp_raspberry: datetime
     device_id: str
     data: EventData
+
+
+
+
+class EventDataPublisher(BaseModel):
+    event_id: UUID
+    appareil_id: UUID 
+    date_evenement: datetime = Field(
+       datetime.now(), description="Instant où l'événement a été détecté (côté appareil)"
+    )
+    timestamp_serveur: datetime 
+    statut_alerte: bool 
+    seuil_reponse_model : float | int
+    statut_raspberry: bool
+    statut_camera: bool
+    statut_capteur: bool
+    statut_bouton : bool
+    video_path: str | Path

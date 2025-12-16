@@ -14,6 +14,7 @@ from collections import Counter
 
 from serveur.configuration import CONFIG
 from serveur.services.utils import YOLO_MODELE , _sanitize_filename
+from serveur.services.event_publisher import envoyer_cloud_data , envoyer_raspberry_data , stockage_local_evenement
 
 
 
@@ -148,9 +149,10 @@ def pipeline_traitement_video(videos_bytes : bytes , algorithme : Literal["YOLO"
         "nombre_frames":nbr_frames or None, 
         # "meilleures_detections_par_frame":meilleures_detections_par_frame or None,
         "algorithme":algorithme,
-        "classes_yolo":compteur_classes or None
+        "classes_yolo":compteur_classes or None,
+        "timestamp_serveur":datetime.datetime.now()
     }
-    return resultat
+    return resultat , video_path
 
 
 
@@ -166,7 +168,7 @@ def visualiser_video_yolo_service(video_bytes):
 
 
 
-def analyser_media(image_bytes: bytes | None, video_bytes: bytes | None) -> dict :
+def pipeline_traitement_data(image_bytes: bytes | None, video_bytes: bytes | None) -> dict :
     result = {"image": None, "video": None}
     if image_bytes is not None:
         try:
@@ -183,9 +185,9 @@ def analyser_media(image_bytes: bytes | None, video_bytes: bytes | None) -> dict
             result["image"] = {"erreur": f"Impossible d'analyser l'image: {e}"}
 
     if video_bytes :
-        resultat = pipeline_traitement_video(videos_bytes=video_bytes,algorithme="YOLO")
-        return resultat
-
-
-
+        resultat , video_path = pipeline_traitement_video(videos_bytes=video_bytes,algorithme="YOLO")
+        return resultat , video_path
+    else :             
+        result , None
+    
 

@@ -20,7 +20,8 @@ dependencies = [
     "imageio[ffmpeg]",
     "ultralytics", 
     "pytoml",       
-    "av"           
+    "av",
+    "pydantic-settings"           
 ]
 
 readme = "README.md"
