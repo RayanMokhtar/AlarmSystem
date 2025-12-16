@@ -1,4 +1,9 @@
-from fastapi import FastAPI, HTTPException
+import json
+import os
+import shutil
+from uuid import uuid4
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from Gestion_Video import enregistrer_video
 from Insertions import Appareil, CreationRequest, Equipement, Evenement, Lieu, Notification, Utilisateur, inserer_appareil, inserer_equipement, inserer_lieu, inserer_notification, inserer_utilisateur, insertion_evenement
 from selection import *
 
@@ -34,11 +39,41 @@ def create_equipement(data : Appareil):
     equipement_id = inserer_equipement(data)
     return {"status": "success", "equipement_id": equipement_id}
 
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+import json
+from uuid import uuid4
+from datetime import datetime
+
 @app.post("/creerEvenement")
-def create_evenement(evenement : Evenement):
-    evenement_id = insertion_evenement(evenement)
-    return {"status": "success", "utilisateur_id": evenement_id}
- 
+async def create_evenement(
+    evenement: str = Form(...),  # JSON de l'événement
+    notif: str = Form(...),      # JSON de la notification
+    video: UploadFile = File(...)
+):
+    # Convertir JSON en objets Pydantic
+    evenement_obj = Evenement(**json.loads(evenement))
+    notif_obj = Notification(**json.loads(notif))
+
+    # Insérer l'événement
+    evenement_id = insertion_evenement(evenement_obj)
+
+    # Sauvegarder la vidéo
+    out_path = f"videos_engistrées/{video.filename}"
+    with open(out_path, "wb") as f:
+        while chunk := await video.read(1024 * 1024):
+            f.write(chunk)
+
+    # Insérer la notification
+    notification_id = inserer_notification(notif_obj)
+
+    return {
+        "status": "success",
+        "evenement_id": evenement_id,
+        "notification_id": notification_id,
+        "status_vid": "ok",
+        "saved_as": str(out_path)
+    }
+
 
 @app.post("/creerNotification")
 def create_notification(notif : Notification): 
