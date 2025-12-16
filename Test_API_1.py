@@ -2,7 +2,7 @@ import requests
 from uuid import uuid4
 from datetime import date
 
-url = "http://127.0.0.1:8000/creerUtilisateur"
+url = "https://alarmsystem-hl0s.onrender.com/creerUtilisateur"
 url2 = "http://127.0.0.1:8000/creerNotification"
 
 utilisateur_id = str(uuid4())
@@ -14,7 +14,7 @@ notification_id = str(uuid4())
 data = {
     "utilisateur": {
         "utilisateur_id": utilisateur_id,
-        "email": "zah@gmail.com",
+        "email": "zaah@gmail.com",
         "motdepasse": "1235",
         "date_creation": "2025-05-21"
     },
@@ -45,13 +45,13 @@ data = {
 
 data1 = {
     "notification_id": notification_id, 
-    "utilisateur_id" : "401eb00d-20a3-43c0-9c79-07c82b13d6b4",
+    "utilisateur_id" : "401eb00d-20a3-43c0-9c79-07c82b13d605",
     "evenement_id" : "e5338c49-af48-4f12-8cee-c64bb1c2d0f3",
     "statut_notification" : True, 
     "date_notification":str(date.today())
  
 }
 
-response = requests.post(url2, json=data1)
+response = requests.post(url, json=data)
 print("Status code:", response.status_code)
 print("Response JSON:", response.json())
