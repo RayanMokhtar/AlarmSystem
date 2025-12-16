@@ -49,7 +49,7 @@ data1 = {
     "evenement_id" : "e5338c49-af48-4f12-8cee-c64bb1c2d0f3",
     "statut_notification" : True, 
     "date_notification":str(date.today())
-
+ 
 }
 
 response = requests.post(url2, json=data1)
