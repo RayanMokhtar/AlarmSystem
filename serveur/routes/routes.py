@@ -3,8 +3,7 @@ from datetime import datetime
 import json
 
 from serveur.models.schemas import AlerteRaspberry
-from serveur.services.stockage import save_event
-from serveur.services.traitement_video import analyser_media
+from serveur.services.traitement_video import analyser_media , visualiser_video_yolo_service
 
 router = APIRouter()
 
@@ -12,6 +11,17 @@ router = APIRouter()
 def recevoir_potentielle_alerte_json(payload: AlerteRaspberry):
     return {"ok": True, "event_id": payload.event_id}
 
+
+
+@router.post("/visualiser_video_yolo")
+async def visualiser_video_yolo(
+    video: UploadFile | None = File(None),          
+):
+    try : 
+        video_bytes = await video.read() if video else None
+        visualiser_video_yolo_service(video_bytes)
+    except Exception as e : 
+        raise HTTPException(status_code=500, detail=f" erreur lors visualisation {str(e)}")
 
 
 

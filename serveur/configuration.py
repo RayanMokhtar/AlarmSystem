@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 
 class PathConfig(BaseModel):
-    
+
     data_dir: Path = Field(
         default=DATA_DIR,
         description="Répertoire de base absolu pour les données (Serveur/data)"
@@ -38,8 +38,10 @@ class PathConfig(BaseModel):
         description="Chemin vers le répertoire des modèles de sortie"
     )
 
+
+
 class AIModelConfig(BaseModel):
-    model_path: str = Field(default="yolov8n.pt", description="Chemin vers le modèle AI")
+    model_path: Path = Field(default=Path(PathConfig().models_path / "yolov8n.pt"), description="Chemin vers le modèle AI")
     device: Literal["cpu", "cuda"] = Field(default="cpu", description="Dispositif pour l'exécution du modèle")
     input_size: tuple[int, int] = Field(default=(640, 640), description="Taille d'entrée du modèle (largeur, hauteur)")
 

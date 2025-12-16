@@ -39,12 +39,13 @@ def videos_bytes_to_file(video_bytes: bytes, nom_fichier = None, extension = ".m
 
 def lancer_video(video_path : str ) -> None:
     try: 
+        print("lancement video ................",video_path)
         os.startfile(video_path)
     except Exception as e : 
         print("pb lecture video ",str(e))
         
 
-def get_video_annotee_yolo(video_path: str , fichier_sortie = "sortie_yolo") -> str:
+def get_video_annotee_yolo(video_path: str , fichier_sortie = "sortie_yolo.mp4") -> str:
     DEFAULT_FPS = 25
     model = YOLO_MODELE
     cap = cv2.VideoCapture(video_path)
@@ -55,8 +56,10 @@ def get_video_annotee_yolo(video_path: str , fichier_sortie = "sortie_yolo") -> 
     print("fps", fps)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fichier_sortie = f"{CONFIG.path_config.videos_path}/{datetime.datetime.now()}/{fichier_sortie}"
-    
+
+    nom_fichier = f'{datetime.datetime.now()}/{fichier_sortie}'
+    nom_fichier = _sanitize_filename(nom_fichier)
+    fichier_sortie = f"{CONFIG.path_config.output_models_path}/{nom_fichier}"
     fourcc = cv2.VideoWriter_fourcc(*"mp4v") #maniere de compresser
     writer = cv2.VideoWriter(fichier_sortie, fourcc, fps, (width, height))
 
@@ -104,18 +107,18 @@ def agreger_stats_yolo(results_generator, model):
                 else :
                     classes_counter[class_name]+= 1
 
-            confidences = r.boxes.conf
-            max_idx = confidences.argmax().item()#index meilleur box
-            best_conf = float(confidences[max_idx].item())
-            best_class_id = int(r.boxes.cls[max_idx].item())
-            best_class_name = model.names[best_class_id]
-            best_box = r.boxes.xyxy[max_idx].tolist()
+            # confidences = r.boxes.conf
+            # max_idx = confidences.argmax().item()#index meilleur box
+            # best_conf = float(confidences[max_idx].item())
+            # best_class_id = int(r.boxes.cls[max_idx].item())
+            # best_class_name = model.names[best_class_id]
+            # best_box = r.boxes.xyxy[max_idx].tolist()
 
-            best_detection_per_frame.append({
-                "confidence": best_conf,
-                "class": best_class_name,
-                "box": best_box
-            })
+            # best_detection_per_frame.append({
+            #     "confidence": best_conf,
+            #     "class": best_class_name,
+            #     "box": best_box
+            # })
         else:
             best_detection_per_frame.append(None)
     return nb_frames, classes_counter, best_detection_per_frame
@@ -143,11 +146,21 @@ def pipeline_traitement_video(videos_bytes : bytes , algorithme : Literal["YOLO"
     resultat = {
         "dictionnaire_analyse":dictionnaire_analyse, 
         "nombre_frames":nbr_frames or None, 
-        "meilleures_detections_par_frame":meilleures_detections_par_frame or None,
+        # "meilleures_detections_par_frame":meilleures_detections_par_frame or None,
         "algorithme":algorithme,
         "classes_yolo":compteur_classes or None
     }
     return resultat
+
+
+
+
+def visualiser_video_yolo_service(video_bytes):
+    if video_bytes:
+        video_path = videos_bytes_to_file(video_bytes,lancer_video=False)
+        fichier_sortie_modele = get_video_annotee_yolo(video_path)
+        print("ficheir sortie",fichier_sortie_modele)
+        lancer_video(fichier_sortie_modele)
 
 
 
@@ -172,6 +185,7 @@ def analyser_media(image_bytes: bytes | None, video_bytes: bytes | None) -> dict
     if video_bytes :
         resultat = pipeline_traitement_video(videos_bytes=video_bytes,algorithme="YOLO")
         return resultat
+
 
 
 
