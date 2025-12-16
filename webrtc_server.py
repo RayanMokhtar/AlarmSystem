@@ -9,7 +9,7 @@ from threading import Lock
 import cv2
 import numpy as np
 from aiohttp import web
-from aiortc import RTCPeerConnection, RTCSessionDescription
+from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration
 from aiortc.mediastreams import VideoStreamTrack
 from av import VideoFrame
 
@@ -79,7 +79,7 @@ class WebcamVideoTrack(VideoStreamTrack):
         if not self._started:
             shared_webcam.acquire()
             self._started = True
-        _debug("WebcamVideoTrack started")
+            _debug("WebcamVideoTrack started")
 
         # Target pacing
         await asyncio.sleep(1.0 / max(FPS, 1.0))
@@ -188,7 +188,17 @@ WEbrtc_HTML = """<!doctype html>
         }
 
         setStatus('Connexion au serveur…');
-        pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        // Pas de STUN = fonctionne sur réseau local sans internet
+        pc = new RTCPeerConnection({ iceServers: [] });
+
+        // Log les candidats ICE pour debug
+        pc.onicecandidate = (ev) => {
+          if (ev.candidate) {
+            console.log('ICE candidate (client):', ev.candidate.candidate);
+          } else {
+            console.log('ICE gathering complete (client)');
+          }
+        };
 
         pc.ontrack = (ev) => {
           setStatus('Flux reçu');
@@ -291,6 +301,20 @@ async def webrtc_page(_request):
     return web.Response(text=WEbrtc_HTML, content_type="text/html")
 
 
+async def control_direction(request: web.Request):
+    direction = request.match_info.get('direction', 'unknown')
+    remote = request.remote or "unknown"
+    
+    # Log la commande reçue
+    _log(f"[CONTROL] Direction '{direction}' from {remote}")
+    print(f">>> Commande reçue: {direction.upper()}", flush=True)
+    
+    # Ici tu pourras ajouter le code pour contrôler un servo moteur, etc.
+    # Pour l'instant on fait juste un print
+    
+    return web.json_response({"status": "ok", "direction": direction})
+
+
 async def offer(request: web.Request):
     try:
         params = await request.json()
@@ -314,9 +338,17 @@ async def offer(request: web.Request):
       pcs.discard(old_pc)
       pcs_by_remote.pop(remote, None)
 
-    pc = RTCPeerConnection()
+    # Pas de STUN = fonctionne sur réseau local sans internet
+    config = RTCConfiguration(iceServers=[])
+    pc = RTCPeerConnection(configuration=config)
     pcs.add(pc)
     pcs_by_remote[remote] = pc
+
+    # Log les candidats ICE générés par le serveur
+    @pc.on("icecandidate")
+    def on_icecandidate(candidate):
+        if candidate:
+            _log(f"ICE candidate (server): {candidate.candidate}")
 
     # Add webcam track
     pc.addTrack(WebcamVideoTrack())
@@ -363,6 +395,7 @@ def main():
     app.router.add_get("/webrtc", webrtc_page)
     app.router.add_get("/webrtc/", webrtc_page)
     app.router.add_post("/offer", offer)
+    app.router.add_post("/control/{direction}", control_direction)
     app.on_shutdown.append(on_shutdown)
 
     web.run_app(app, host=APP_HOST, port=APP_PORT)

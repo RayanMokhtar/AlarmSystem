@@ -200,6 +200,21 @@ def video_feed_slash():
     return Response(mjpeg_stream(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 
+@app.post("/control/<direction>")
+def control_direction(direction):
+    """Endpoint pour recevoir les commandes directionnelles"""
+    from flask import request
+    remote = request.remote_addr or "unknown"
+    
+    print(f"[CONTROL] Direction '{direction}' from {remote}", flush=True)
+    print(f">>> Commande reçue: {direction.upper()}", flush=True)
+    
+    # Ici tu pourras ajouter le code pour contrôler un servo moteur, etc.
+    # Pour l'instant on fait juste un print
+    
+    return jsonify({"status": "ok", "direction": direction})
+
+
 if __name__ == "__main__":
     # Accessible depuis le téléphone sur le LAN: http://IP_DU_PC:8080/
     app.run(host=APP_HOST, port=APP_PORT, threaded=True, debug=False)

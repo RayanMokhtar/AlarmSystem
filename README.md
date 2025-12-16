@@ -61,7 +61,49 @@ Si tu changes le port (ex: 8090), adapte les URLs.
 - Windows Firewall peut bloquer le port 8080; autoriser Python/port si besoin.
 - La webcam du PC est ouverte uniquement quand au moins un client consulte `/video_feed` (elle se libère à la déconnexion du dernier client).
 
+## Accès depuis internet (ngrok)
 
+Si tu veux accéder au flux **depuis n'importe quel réseau** (pas juste le réseau local), utilise ngrok.
 
-commande : cd "C:\Users\darkf\Desktop\service caméra" # a changer 
+### Installation ngrok
+1. Télécharge ngrok: https://ngrok.com/download
+2. Extrais `ngrok.exe` dans ce dossier (ou ajoute-le au PATH)
+3. (Optionnel) Crée un compte gratuit sur ngrok.com et configure ton authtoken:
+   ```powershell
+   ngrok config add-authtoken TON_TOKEN
+   ```
+
+### Lancement avec ngrok
+Double-clique sur `run_public.bat` ou exécute:
+```powershell
+.\run_public.ps1
+```
+
+ngrok affichera une URL publique (ex: `https://abc123.ngrok.io`).
+Utilise cette URL pour accéder au flux depuis n'importe où:
+```
+https://abc123.ngrok.io/webrtc
+```
+
+### Lancement manuel
+```powershell
+# Terminal 1: Lance le serveur
 $env:PORT=8090; .\.venv\Scripts\python.exe webrtc_server.py
+
+# Terminal 2: Lance ngrok
+ngrok http 8090
+```
+
+## Commandes rapides
+
+Lancement local (même réseau):
+```powershell
+cd "C:\Users\darkf\Desktop\service caméra"
+.\run.bat
+```
+
+Lancement public (internet via ngrok):
+```powershell
+cd "C:\Users\darkf\Desktop\service caméra"
+.\run_public.bat
+```
