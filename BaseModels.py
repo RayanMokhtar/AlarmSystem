@@ -65,3 +65,7 @@ class Notification(BaseModel):
     evenement_id: UUID
     statut_notification: bool
     date_notification: datetime
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    motdepasse: str

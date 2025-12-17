@@ -4,8 +4,8 @@ import psycopg2
 from pydantic import BaseModel, EmailStr
 from psycopg2.extras import RealDictCursor
 from uuid import UUID
-
-from BaseModels import Notification
+from passlib.context import CryptContext
+from BaseModels import LoginRequest, Notification
 
 DB_HOST = "postgresql-hammal.alwaysdata.net"
 DB_NAME = "hammal_atelierrt"
@@ -115,3 +115,67 @@ def select_notification(utilisateur_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+def connexion_utilisateur(data: LoginRequest):
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASS,
+            cursor_factory=RealDictCursor
+        )
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            SELECT utilisateur_id, email, motdepasse
+            FROM utilisateur
+            WHERE email = %s
+            """,
+            (data.email,)
+        )
+
+        utilisateur = cur.fetchone()
+
+        # Email inexistant
+        if not utilisateur:
+            raise HTTPException(
+                status_code=401,
+                detail="Email ou mot de passe incorrect"
+            )
+
+        # 3️⃣ Comparaison clair ↔ hash
+        if not verifier_motdepasse(
+            data.motdepasse,           # mot de passe EN CLAIR
+            utilisateur["motdepasse"]  # hash en base
+        ):
+            raise HTTPException(
+                status_code=401,
+                detail="Email ou mot de passe incorrect"
+            )
+
+        cur.close()
+        conn.close()
+
+        # 4️⃣ Succès
+        return {
+            "message": "Connexion réussie",
+            "utilisateur_id": utilisateur["utilisateur_id"],
+            "email": utilisateur["email"]
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
+def verifier_motdepasse(motdepasse_clair: str, motdepasse_hash: str) -> bool:
+    return pwd_context.verify(motdepasse_clair, motdepasse_hash)

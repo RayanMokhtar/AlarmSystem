@@ -2,7 +2,7 @@ import requests
 from uuid import uuid4
 from datetime import date
 
-url = "https://alarmsystem-hl0s.onrender.com/creerUtilisateur"
+url = "http://127.0.0.1:8000/creer_Compte_utilisateur"
 url2 = "http://127.0.0.1:8000/creerNotification"
 
 utilisateur_id = str(uuid4())
@@ -14,7 +14,7 @@ notification_id = str(uuid4())
 data = {
     "utilisateur": {
         "utilisateur_id": utilisateur_id,
-        "email": "zaah@gmail.com",
+        "email": "zaahaa@gmail.com",
         "motdepasse": "1235",
         "date_creation": "2025-05-21"
     },

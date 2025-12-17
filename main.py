@@ -19,18 +19,23 @@ def creer_Compte_utilisateur(utilisateur: Utilisateur):
     }
 
 @app.post("/creer_Compte_utilisateur")
-def creer_Compte_utilisateur(data: CreationRequest):
-    user_id = inserer_utilisateur(data.utilisateur)
-    lieu_id = inserer_lieu(data.lieu)
-    appareil_id = inserer_appareil(data.appareil)
-    equipement_id = inserer_equipement(data.equipement)
-    return {
-        "status": "success",
-        "utilisateur_id": str(user_id),
-        "lieu_id": str(lieu_id),
-        "appareil_id": str(appareil_id),
-        "equipement_id": str(equipement_id)
-    }
+def creer_compte(data: CreationRequest):
+    try:
+        user_id = inserer_utilisateur(data.utilisateur)
+        lieu_id = inserer_lieu(data.lieu)
+        appareil_id = inserer_appareil(data.appareil)
+        equipement_id = inserer_equipement(data.equipement)
+
+        return {
+            "status": "success",
+            "utilisateur_id": str(user_id),
+            "lieu_id": str(lieu_id),
+            "appareil_id": str(appareil_id),
+            "equipement_id": str(equipement_id)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/creerLieu")
 def create_lieu(data : Lieu):
@@ -99,3 +104,8 @@ def get_notification(utilisateur_id: str):
         raise HTTPException(status_code=404, detail="lieu introuvable")
 
     return lieu
+
+@app.post("/Connexion")
+def vérif_Connexion(data: LoginRequest):
+    reponse = connexion_utilisateur(data)
+    return reponse
