@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from queue import Full
 from fastapi import FastAPI, HTTPException
 import psycopg2
 from pydantic import BaseModel, EmailStr
@@ -8,7 +9,7 @@ from passlib.context import CryptContext
 from psycopg2.extras import RealDictCursor
 from fastapi import HTTPException
 import psycopg2
-from BaseModels import Appareil, Equipement, Evenement, Lieu, Utilisateur
+from BaseModels import Appareil, Equipement, Evenement, Lieu, Notification, Utilisateur
 
 DB_HOST = "postgresql-hammal.alwaysdata.net"
 DB_NAME = "hammal_atelierrt"
@@ -227,7 +228,8 @@ def insertion_evenement(evenement: Evenement):
                 utilisateur_id,
                 evenement_id,
                 statut_notification,
-                date_notification
+                date_notification, 
+                message
             )
             VALUES (%s, %s, %s, %s, %s, %s)
             """,
@@ -236,8 +238,8 @@ def insertion_evenement(evenement: Evenement):
                 str(utilisateur_id),
                 str(evenement_id),
                 False,                 
-                evenement.date_evenement
-
+                evenement.date_evenement,
+                None
             )
         )
 
@@ -273,17 +275,19 @@ def inserer_notification(data: Notification):
                 utilisateur_id,
                 evenement_id,
                 statut_notification,
-                date_notification
+                date_notification, 
+                message
             )
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING notification_id
             """,
             (
                 str(data.notification_id),
                 str(data.utilisateur_id),
-                str(data.evenement_id),
+                None,
                 data.statut_notification,
-                data.date_notification
+                data.date_notification,
+                data.message
             )
         )
 

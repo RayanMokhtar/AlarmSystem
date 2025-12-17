@@ -140,3 +140,8 @@ def nombreEquipementEnPanne():
     nb = calculerEquipementEnPanne()
     return nb 
 
+
+@app.get("/equipement_le_plus_en_panne")
+def nombreEquipementEnPanne():
+    nb = Trouver_equip_le_plus_en_panne()
+    return nb 

@@ -1,4 +1,6 @@
+from argparse import OPTIONAL
 from datetime import date, datetime
+from typing import Optional
 from fastapi import FastAPI, HTTPException
 import psycopg2
 from pydantic import BaseModel, EmailStr
@@ -64,7 +66,7 @@ class CreationRequest(BaseModel):
 class Notification(BaseModel):
     notification_id: UUID
     utilisateur_id: UUID
-    evenement_id: UUID
+    evenement_id: Optional[UUID]
     statut_notification: str
     date_notification: datetime
     message: str
