@@ -177,5 +177,10 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
+import bcrypt
+
 def verifier_motdepasse(motdepasse_clair: str, motdepasse_hash: str) -> bool:
-    return pwd_context.verify(motdepasse_clair, motdepasse_hash)
+    motdepasse_clair = motdepasse_clair[:72].encode("utf-8")  # 🔹 tronquer ici
+    motdepasse_hash = motdepasse_hash.encode("utf-8")
+    return bcrypt.checkpw(motdepasse_clair, motdepasse_hash)
+

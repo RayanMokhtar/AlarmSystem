@@ -12,7 +12,7 @@ app = FastAPI()
 
 @app.post("/creerUtilisateur")
 def creer_Compte_utilisateur(utilisateur: Utilisateur):
-    user_id = inserer_utilisateur(utilisateur.utilisateur)
+    user_id = inserer_utilisateur(utilisateur)
     return {
         "status": "success",
         "utilisateur_id": str(user_id)
@@ -20,6 +20,20 @@ def creer_Compte_utilisateur(utilisateur: Utilisateur):
 
 @app.post("/creer_Compte_utilisateur")
 def creer_compte(data: CreationRequest):
+     
+    utilisateur_id = str(uuid4())
+    lieu_id = str(uuid4())
+    appareil_id = str(uuid4())
+    equipement_id = str(uuid4())
+
+    data.utilisateur.utilisateur_id = utilisateur_id
+    data.lieu.lieu_id = lieu_id
+    data.lieu.utilisateur_id = utilisateur_id
+    data.appareil.appareil_id = appareil_id
+    data.appareil.lieu_id = lieu_id
+    data.equipement.equipement_id = equipement_id
+    data.equipement.appareil_id = appareil_id
+
     try:
         user_id = inserer_utilisateur(data.utilisateur)
         lieu_id = inserer_lieu(data.lieu)
@@ -57,7 +71,7 @@ async def create_evenement(evenement: str = Form(...),video: UploadFile = File(.
     # Convertir la string JSON en dict, puis en modèle Pydantic
     evenement_data = json.loads(evenement)
     evenement_obj = Evenement(**evenement_data)
-    
+    evenement_obj.evenement_id = str(uuid4())
     evenement_id = insertion_evenement(evenement_obj)
 
     out_path = f"videos_engistrées/{video.filename}"

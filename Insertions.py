@@ -29,20 +29,25 @@ class Notification(BaseModel):
     evenement_id: UUID
     statut_notification: bool
     date_notification: datetime
-
+from passlib.context import CryptContext
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
+import bcrypt
 
-def hacher_mot_de_passe(motdepasse: str) -> str:
-    return pwd_context.hash(motdepasse)
+def hasher_mot_de_passe(password: str) -> str:
+    # tronquer à 72 caractères
+    password = password[:72].encode('utf-8')
+    hashed = bcrypt.hashpw(password, bcrypt.gensalt())
+    return hashed.decode('utf-8')
 
 def inserer_utilisateur(data: Utilisateur):
+
     try:
 
-        motdepasse_hache = hacher_mot_de_passe(data.motdepasse)
+        motdepasse_hache = hasher_mot_de_passe(data.motdepasse)
 
         conn = psycopg2.connect(
             host=DB_HOST,
@@ -55,15 +60,16 @@ def inserer_utilisateur(data: Utilisateur):
 
         cur.execute(
             """
-            INSERT INTO utilisateur (utilisateur_id, email, motdepasse, date_creation)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO utilisateur (utilisateur_id, email, motdepasse, date_creation, login)
+            VALUES (%s, %s, %s, %s, %s)
             RETURNING utilisateur_id
             """,
             (
                 str(data.utilisateur_id),
                 data.email,
                 motdepasse_hache,  
-                data.date_creation
+                data.date_creation,
+                data.login
             )
         )
 

@@ -17,6 +17,7 @@ class Utilisateur(BaseModel):
     email: EmailStr
     motdepasse: str
     date_creation: date
+    login : str
 
 class Lieu(BaseModel):
     lieu_id: UUID

@@ -14,20 +14,20 @@ notification_id = str(uuid4())
 data = {
     "utilisateur": {
         "utilisateur_id": utilisateur_id,
-        "email": "zaahaa@gmail.com",
-        "motdepasse": "1235",
+        "email": "TestInscriiption@gmail.com",
+        "motdepasse": "1234",
         "date_creation": "2025-05-21"
     },
     "lieu": {
         "lieu_id": lieu_id,
-        "utilisateur_id": utilisateur_id,  # clé étrangère vers utilisateur
+        "utilisateur_id": utilisateur_id,  
         "nom": "Maison",
         "adresse": "123 rue Exemple",
         "date_creation": str(date.today())
     },
     "appareil": {
         "appareil_id": appareil_id,
-        "lieu_id": lieu_id,  # clé étrangère vers lieu
+        "lieu_id": lieu_id,  
         "nom": "Thermostat",
         "type": "chauffage",
         "statut": "actif",
@@ -35,7 +35,7 @@ data = {
     },
     "equipement": {
         "equipement_id": equipement_id,
-        "appareil_id": appareil_id,  # clé étrangère vers appareil
+        "appareil_id": appareil_id,  
         "nom": "Capteur température",
         "type": "température",
         "statut": "actif",
@@ -51,6 +51,13 @@ data1 = {
     "date_notification":str(date.today())
  
 }
+data2 = {
+        "utilisateur_id": utilisateur_id,
+        "email": "zaahaa1@gmail.com",
+        "motdepasse": "1235",
+        "date_creation": "2025-05-21"
+    }
+    
 
 response = requests.post(url, json=data)
 print("Status code:", response.status_code)

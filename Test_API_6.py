@@ -3,8 +3,8 @@ import requests
 url = "http://127.0.0.1:8000/Connexion"
 
 login_data = {
-    "email": "test@mail.com",
-    "motdepasse": "motdepasse123"
+    "email": "TestInscription@gmail.com",
+    "motdepasse": "12345"
 }
 
 response = requests.post(url, json=login_data)
