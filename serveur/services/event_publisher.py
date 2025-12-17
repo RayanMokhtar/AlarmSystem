@@ -48,10 +48,12 @@ def construire_event_data(donnes_raspberry : AlerteRaspberry , resultat:dict,vid
             appareil_id=appareil_id,
             timestamp_serveur=resultat.get("timestamp_serveur"),
             statut_alerte=bool(d.get("statut_alerte", False)),
-            seuil_reponse_model=seuil,
+            date_evenement = datetime.datetime.now(),
+            timestamp_rasp = donnes_raspberry.timestamp_raspberry,
+            seuil_reponse_modele=seuil,
             statut_raspberry=donnes_raspberry.data.alerte_potentielle,
             statut_camera=statut_camera,
-            statut_bouton=statut_bouton,
+            statut_boutton=statut_bouton,
             statut_capteur=statut_capteur,
             emplacement_video_evenement=video_path,
         )
@@ -64,9 +66,10 @@ def construire_event_data(donnes_raspberry : AlerteRaspberry , resultat:dict,vid
 def envoyer_cloud_data(event_data:EventDataPublisher,video_path:str):
     route_cloud = f"{CONFIG.serveur_cloud.base_url}/creerEvenement"
     print("endpoint cloud = ",route_cloud)
+    event_data_model_verif = event_data.model_dump_json()#sérialisation directe
     with open(video_path, "rb") as f:
         files = {"video": ("event.mp4", f, "video/mp4")}
-        data = {"evenement": json.dumps(event_data)}
+        data = {"evenement": event_data_model_verif}
         r = requests.post(url = route_cloud, files=files, data=data, timeout=120)
         r.raise_for_status()
         return r.json()

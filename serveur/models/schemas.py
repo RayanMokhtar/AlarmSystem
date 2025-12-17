@@ -46,16 +46,15 @@ class AlerteRaspberry(BaseModel):
 
 
 class EventDataPublisher(BaseModel):
-    evenement_id: UUID
-    appareil_id: UUID
-    date_evenement: datetime = Field(
-       datetime.now(), description="Instant où l'événement a été détecté (côté appareil)"
-    )
+    evenement_id: UUID 
+    appareil_id: UUID 
+    date_evenement: datetime 
+    timestamp_rasp:datetime
     timestamp_serveur: datetime 
     statut_alerte: bool 
-    seuil_reponse_model : float | int
+    seuil_reponse_modele : float 
     statut_raspberry: bool
     statut_camera: bool
     statut_capteur: bool
-    statut_bouton : bool
-    emplacement_video_evenement: str | Path 
+    statut_boutton : bool
+    emplacement_video_evenement: str 

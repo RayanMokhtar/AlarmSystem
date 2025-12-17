@@ -21,7 +21,9 @@ dependencies = [
     "ultralytics", 
     "pytoml",       
     "av",
-    "pydantic-settings"           
+    "python-jose[cryptography]",
+    "pydantic-settings",
+    "psycopg2-binary"     
 ]
 
 readme = "README.md"

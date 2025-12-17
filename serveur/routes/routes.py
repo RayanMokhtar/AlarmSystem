@@ -55,8 +55,8 @@ async def process_raspberry_alerte(
         print('construction event data ....')
         event_data = construire_event_data(donnes_raspberry=metadata , resultat=resultats_modele ,video_path = video_path )
         print("envoi données vers le cloud ...",event_data)
-        # response = envoyer_cloud_data(event_data,video_path = video_path)
-        print("reponse json ... => ")
+        response = envoyer_cloud_data(event_data,video_path = video_path)
+        print("reponse json ... => ", response,"\n\n")
     print("log : insertion fichier en local")
     emplacement_trace_locale = stockage_local_evenement(resultat= resultats_modele,data_raspi=metadata)
     raspberry_data_reponse = envoyer_raspberry_data(resultats_modele) #temporaire à remplacer par al versionfianle
