@@ -6,7 +6,7 @@ from serveur.configuration import CONFIG
 
 app = FastAPI(title="Alarm Server")
 app.include_router(router, prefix="/api/serveur_calcul")
-app.inclure_router(authentification_router, prefix="/api/serveur_calcul")
+app.include_router(authentification_router, prefix="/api/serveur_calcul")
 
 def lancer_serveur() -> None:
     """
@@ -16,7 +16,7 @@ def lancer_serveur() -> None:
         "serveur.main:app",
         host=CONFIG.api_config.host,
         port=CONFIG.api_config.port,
-        reload=True
+        reload=False
     )
 
 

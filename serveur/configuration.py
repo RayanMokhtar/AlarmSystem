@@ -56,9 +56,8 @@ class YoloConfig(AIModelConfig):
 class ApiConfig(BaseModel):
     host: str = Field(default="0.0.0.0", description="Adresse d'écoute api")
     description: Optional[str] = Field(default=None, description="Description courte du service/API")
-    port : int = Field(default=8000,description="port d'exposition de l'api")
-
-
+    port : int = Field(default=8080, description="port d'exposition de l'api")  
+    
 class ExternalApiConfig(BaseModel):
     base_url: str = Field(default="https://api_adam:8000", description="URL de base de l'API externe")
     auth_token: Optional[str] = Field(default=None, description="Token d'authentification si besoin")
@@ -77,7 +76,7 @@ class Configuration(BaseModel):
     ai_config: YoloConfig = Field(YoloConfig(), description="Configuration du modèle AI YOLO")
     api_config: ApiConfig = Field(ApiConfig(), description="Config de l'API locale")
     serveur_raspberry : ExternalApiConfig = Field(ExternalApiConfig(base_url="http://192.168.1.2:5000"), description="Config d'une API externe")
-    serveur_cloud : ExternalApiConfig = Field(ExternalApiConfig(base_url="http://10.12.241.65:8000"), description="Config du serveur cloud ")
+    serveur_cloud : ExternalApiConfig = Field(ExternalApiConfig(base_url="http://10.231.151.22:8040"), description="Config du serveur cloud ")
     securite : Security = Field(Security(),description="classe sécurité")
 
 def get_configuration(): 
