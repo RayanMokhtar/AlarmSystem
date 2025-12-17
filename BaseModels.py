@@ -52,6 +52,7 @@ class Evenement(BaseModel):
     timestamp_rasp: datetime
     statut_camera: bool
     statut_capteur: bool
+    statut_boutton: bool
     emplacement_video_evenement: str
 
 class CreationRequest(BaseModel):
@@ -64,8 +65,9 @@ class Notification(BaseModel):
     notification_id: UUID
     utilisateur_id: UUID
     evenement_id: UUID
-    statut_notification: bool
+    statut_notification: str
     date_notification: datetime
+    message: str
 
 class LoginRequest(BaseModel):
     email: EmailStr

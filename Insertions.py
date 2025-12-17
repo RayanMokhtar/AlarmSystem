@@ -23,12 +23,6 @@ class CreationRequest(BaseModel):
     appareil: Appareil
     equipement: Equipement
 
-class Notification(BaseModel):
-    notification_id: UUID
-    utilisateur_id: UUID
-    evenement_id: UUID
-    statut_notification: bool
-    date_notification: datetime
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(
@@ -183,9 +177,9 @@ def insertion_evenement(evenement: Evenement):
             INSERT INTO evenement (
                 evenement_id, appareil_id, date_evenement, statut_alerte,
                 timestamp_serveur, seuil_reponse_modele, timestamp_rasp,
-                statut_camera, statut_capteur, emplacement_video_evenement
+                statut_camera, statut_capteur, emplacement_video_evenement, statut_boutton
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING evenement_id
             """,
             (
@@ -198,7 +192,8 @@ def insertion_evenement(evenement: Evenement):
                 evenement.timestamp_rasp,
                 evenement.statut_camera,
                 evenement.statut_capteur,
-                evenement.emplacement_video_evenement
+                evenement.emplacement_video_evenement,
+                evenement.statut_boutton
             )
         )
 
@@ -234,7 +229,7 @@ def insertion_evenement(evenement: Evenement):
                 statut_notification,
                 date_notification
             )
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """,
             (
                 str(uuid4()),
@@ -242,6 +237,7 @@ def insertion_evenement(evenement: Evenement):
                 str(evenement_id),
                 False,                 
                 evenement.date_evenement
+
             )
         )
 

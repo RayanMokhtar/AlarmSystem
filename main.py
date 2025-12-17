@@ -5,6 +5,7 @@ from uuid import uuid4
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from Gestion_Video import enregistrer_video
 from Insertions import Appareil, CreationRequest, Equipement, Evenement, Lieu, Notification, Utilisateur, inserer_appareil, inserer_equipement, inserer_lieu, inserer_notification, inserer_utilisateur, insertion_evenement
+from Stats import *
 from selection import *
 
 app = FastAPI()
@@ -123,3 +124,19 @@ def get_notification(utilisateur_id: str):
 def vérif_Connexion(data: LoginRequest):
     reponse = connexion_utilisateur(data)
     return reponse
+
+@app.get("/Stats_total_system")
+def nombreUtiliasteur():
+    nb = calculer_Nb_lieu()
+    return nb
+
+@app.get("/Stats_total_equipement")
+def nombreEquipement():
+    nb = calculer_Nb_equipement()
+    return nb
+
+@app.get("/nombreEquipementEnPanne")
+def nombreEquipementEnPanne():
+    nb = calculerEquipementEnPanne()
+    return nb 
+
