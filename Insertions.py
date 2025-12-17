@@ -3,8 +3,11 @@ from fastapi import FastAPI, HTTPException
 import psycopg2
 from pydantic import BaseModel, EmailStr
 from psycopg2.extras import RealDictCursor
-from uuid import UUID
-
+from uuid import UUID, uuid4
+from passlib.context import CryptContext
+from psycopg2.extras import RealDictCursor
+from fastapi import HTTPException
+import psycopg2
 from BaseModels import Appareil, Equipement, Evenement, Lieu, Utilisateur
 
 DB_HOST = "postgresql-hammal.alwaysdata.net"
@@ -13,7 +16,6 @@ DB_USER = "hammal"
 DB_PASS = "Zahrdin.99"
 
 app = FastAPI()
-
 
 class CreationRequest(BaseModel):
     utilisateur: Utilisateur
@@ -28,8 +30,20 @@ class Notification(BaseModel):
     statut_notification: bool
     date_notification: datetime
 
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
+def hacher_mot_de_passe(motdepasse: str) -> str:
+    return pwd_context.hash(motdepasse)
+
 def inserer_utilisateur(data: Utilisateur):
     try:
+
+        motdepasse_hache = hacher_mot_de_passe(data.motdepasse)
+
         conn = psycopg2.connect(
             host=DB_HOST,
             database=DB_NAME,
@@ -38,19 +52,29 @@ def inserer_utilisateur(data: Utilisateur):
             cursor_factory=RealDictCursor
         )
         cur = conn.cursor()
+
         cur.execute(
             """
             INSERT INTO utilisateur (utilisateur_id, email, motdepasse, date_creation)
             VALUES (%s, %s, %s, %s)
             RETURNING utilisateur_id
             """,
-            (str(data.utilisateur_id), data.email, data.motdepasse, data.date_creation)
+            (
+                str(data.utilisateur_id),
+                data.email,
+                motdepasse_hache,  
+                data.date_creation
+            )
         )
-        user_id = cur.fetchone()["utilisateur_id"]
+
+        utilisateur_id = cur.fetchone()["utilisateur_id"]
+
         conn.commit()
         cur.close()
         conn.close()
-        return user_id
+
+        return utilisateur_id
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -132,7 +156,11 @@ def inserer_equipement(data: Equipement):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+
 def insertion_evenement(evenement: Evenement):
+    conn = None
     try:
         conn = psycopg2.connect(
             host=DB_HOST,
@@ -141,8 +169,9 @@ def insertion_evenement(evenement: Evenement):
             password=DB_PASS,
             cursor_factory=RealDictCursor
         )
-        
         cur = conn.cursor()
+
+        # Insérer l'événement
         cur.execute(
             """
             INSERT INTO evenement (
@@ -168,14 +197,61 @@ def insertion_evenement(evenement: Evenement):
         )
 
         evenement_id = cur.fetchone()["evenement_id"]
+
+        # Récupérer utilisateur_id via appareil → lieu → utilisateur
+
+        cur.execute(
+            """
+            SELECT l.utilisateur_id
+            FROM appareil a
+            JOIN lieu l ON a.lieu_id = l.lieu_id
+            WHERE a.appareil_id = %s
+            """,
+            (str(evenement.appareil_id),)
+        )
+
+        result = cur.fetchone()
+        if not result:
+            raise HTTPException(
+                status_code=404,
+                detail="Utilisateur introuvable pour cet appareil"
+            )
+
+        utilisateur_id = result["utilisateur_id"]
+
+        cur.execute(
+            """
+            INSERT INTO notification (
+                notification_id,
+                utilisateur_id,
+                evenement_id,
+                statut_notification,
+                date_notification
+            )
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (
+                str(uuid4()),
+                str(utilisateur_id),
+                str(evenement_id),
+                False,                 
+                evenement.date_evenement
+            )
+        )
+
+        
         conn.commit()
+
         cur.close()
         conn.close()
+
         return evenement_id
 
     except Exception as e:
+        if conn:
+            conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
+    
 
 def inserer_notification(data: Notification):
     try:

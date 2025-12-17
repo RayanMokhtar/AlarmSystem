@@ -11,7 +11,15 @@ app = FastAPI()
 
 
 @app.post("/creerUtilisateur")
-def creer_utilisateur(data: CreationRequest):
+def creer_Compte_utilisateur(utilisateur: Utilisateur):
+    user_id = inserer_utilisateur(utilisateur.utilisateur)
+    return {
+        "status": "success",
+        "utilisateur_id": str(user_id)
+    }
+
+@app.post("/creer_Compte_utilisateur")
+def creer_Compte_utilisateur(data: CreationRequest):
     user_id = inserer_utilisateur(data.utilisateur)
     lieu_id = inserer_lieu(data.lieu)
     appareil_id = inserer_appareil(data.appareil)
@@ -39,41 +47,25 @@ def create_equipement(data : Appareil):
     equipement_id = inserer_equipement(data)
     return {"status": "success", "equipement_id": equipement_id}
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-import json
-from uuid import uuid4
-from datetime import datetime
-
 @app.post("/creerEvenement")
-async def create_evenement(
-    evenement: str = Form(...),  # JSON de l'événement
-    notif: str = Form(...),      # JSON de la notification
-    video: UploadFile = File(...)
-):
-    # Convertir JSON en objets Pydantic
-    evenement_obj = Evenement(**json.loads(evenement))
-    notif_obj = Notification(**json.loads(notif))
-
-    # Insérer l'événement
+async def create_evenement(evenement: str = Form(...),video: UploadFile = File(...)):
+    # Convertir la string JSON en dict, puis en modèle Pydantic
+    evenement_data = json.loads(evenement)
+    evenement_obj = Evenement(**evenement_data)
+    
     evenement_id = insertion_evenement(evenement_obj)
 
-    # Sauvegarder la vidéo
     out_path = f"videos_engistrées/{video.filename}"
     with open(out_path, "wb") as f:
         while chunk := await video.read(1024 * 1024):
             f.write(chunk)
 
-    # Insérer la notification
-    notification_id = inserer_notification(notif_obj)
-
     return {
         "status": "success",
         "evenement_id": evenement_id,
-        "notification_id": notification_id,
         "status_vid": "ok",
         "saved_as": str(out_path)
     }
-
 
 @app.post("/creerNotification")
 def create_notification(notif : Notification): 

@@ -8,7 +8,7 @@ url = "http://127.0.0.1:8000/creerEvenement"
 
 evenement_dict = {
     "evenement_id": str(uuid4()),
-    "appareil_id": "43c6cf82-a8ef-41d3-9cbc-104d12eb1be8",
+    "appareil_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "date_evenement": str(date.today()),
     "statut_alerte": False,
     "timestamp_serveur": str(datetime.now()),
@@ -30,7 +30,6 @@ notif_dict = {
 m = MultipartEncoder(
     fields={
         "evenement": json.dumps(evenement_dict),
-        "notif": json.dumps(notif_dict),
         "video": ("video_test2.mp4", open("video_test.mp4", "rb"), "video/mp4")
     }
 )

@@ -17,9 +17,9 @@ def select_utilisateur(utilisateur_id: str):
     try:
         conn = psycopg2.connect(
             host=DB_HOST,
-            database=DB_NAME,
-            user=DB_USER,
-            password=DB_PASS,
+            database=DB_NAME,            
+            user=DB_USER,                
+            password=DB_PASS,            
             cursor_factory=RealDictCursor
         )
         cur = conn.cursor()
