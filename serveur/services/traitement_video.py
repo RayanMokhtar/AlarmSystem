@@ -18,7 +18,9 @@ from serveur.services.event_publisher import envoyer_cloud_data , envoyer_raspbe
 
 
 
-SEUIL_YOLO = 10 #ou seuil dynamique avec présence au moins 20% du temps 0.2*fps*duree_record
+SEUIL_YOLO = 20 #ou seuil dynamique avec présence au moins 20% du temps 0.2*fps*duree_record
+
+#Si personne pendant 2 secondes alors => ok 
 
 
 def videos_bytes_to_file(video_bytes: bytes, nom_fichier = None, extension = ".mp4" , lancer_video : bool = True):

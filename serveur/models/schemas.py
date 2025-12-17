@@ -58,4 +58,4 @@ class EventDataPublisher(BaseModel):
     statut_camera: bool
     statut_capteur: bool
     statut_bouton : bool
-    emplacement_video_evenement: str | Path
+    emplacement_video_evenement: str | Path 
