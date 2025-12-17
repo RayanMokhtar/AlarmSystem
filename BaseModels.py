@@ -47,7 +47,7 @@ class Equipement(BaseModel):
 class Evenement(BaseModel):
     evenement_id: UUID
     appareil_id: UUID
-    date_evenement: date
+    date_evenement: datetime
     statut_alerte: bool
     timestamp_serveur: datetime
     seuil_reponse_modele: float

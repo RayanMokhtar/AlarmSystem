@@ -3,6 +3,7 @@ import os
 import shutil
 from uuid import uuid4
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from Gestion_Video import enregistrer_video
 from Insertions import Appareil, CreationRequest, Equipement, Evenement, Lieu, Notification, Utilisateur, inserer_appareil, inserer_equipement, inserer_lieu, inserer_notification, inserer_utilisateur, insertion_evenement
 from Stats import *
@@ -10,6 +11,13 @@ from selection import *
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 @app.post("/creerUtilisateur")
 def creer_Compte_utilisateur(utilisateur: Utilisateur):
@@ -70,22 +78,30 @@ def create_equipement(data : Appareil):
 @app.post("/creerEvenement")
 async def create_evenement(evenement: str = Form(...),video: UploadFile = File(...)):
     # Convertir la string JSON en dict, puis en modèle Pydantic
-    evenement_data = json.loads(evenement)
-    evenement_obj = Evenement(**evenement_data)
-    evenement_obj.evenement_id = str(uuid4())
-    evenement_id = insertion_evenement(evenement_obj)
+    try : 
+        evenement_data = json.loads(evenement)
+        try : 
+            evenement_obj = Evenement(**evenement_data)
+        except Exception as e : 
+            print("erreur ici", str(e))
+        
+        evenement_obj.evenement_id = str(uuid4())
+        print("evenement_obj",evenement_obj)
+        evenement_id = insertion_evenement(evenement_obj)
+        print("partie video : ")
+        out_path = f"videos_engistrées/{video.filename}"
+        with open(out_path, "wb") as f:
+            while chunk := await video.read(1024 * 1024):
+                f.write(chunk)
 
-    out_path = f"videos_engistrées/{video.filename}"
-    with open(out_path, "wb") as f:
-        while chunk := await video.read(1024 * 1024):
-            f.write(chunk)
-
-    return {
-        "status": "success",
-        "evenement_id": evenement_id,
-        "status_vid": "ok",
-        "saved_as": str(out_path)
-    }
+        return {
+            "status": "success",
+            "evenement_id": evenement_id,
+            "status_vid": "ok",
+            "saved_as": str(out_path)
+        }
+    except Exception as e : 
+        raise HTTPException(status_code=500,detail=f"erreur interne de serveur{str(e)}")
 
 @app.post("/creerNotification")
 def create_notification(notif : Notification): 

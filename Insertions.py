@@ -252,6 +252,7 @@ def insertion_evenement(evenement: Evenement):
         return evenement_id
 
     except Exception as e:
+        print("exception a ce niveua",str(e))
         if conn:
             conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
