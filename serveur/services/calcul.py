@@ -11,7 +11,7 @@ from PIL import Image
 from collections import Counter
 
 
-from serveur.services.stockage import load_event_metadata, get_event_video_path
+from AlarmSystem.serveur.services.persistence import load_event_metadata, get_event_video_path
 from serveur.configuration import CONFIG
 
 

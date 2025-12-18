@@ -5,7 +5,7 @@ from jose import jwt, JWTError
 from serveur.configuration import CONFIG
 from serveur.models.db_models import LoginRequest
 from serveur.services.security import create_access_token, create_refresh_token, get_current_user
-from serveur.services.authentification import authenticate_user
+from serveur.services.authentification import authenticate_user , inscrire_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -33,6 +33,29 @@ def login(request: LoginRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la connexion: {str(e)}")
+
+
+@router.post("/inscrire")
+def inscrire_utilisateur(email: str, motdepasse: str, login: str, adresse: str):
+    """
+    Endpoint pour inscrire un nouvel utilisateur.
+    
+    - **email**: Adresse email.
+    - **motdepasse**: Mot de passe.
+    - **login**: Nom d'utilisateur.
+    - **adresse**: Adresse du lieu.
+    
+    Retourne les IDs créés ou une erreur.
+    """
+    try:
+        result = inscrire_user(email, motdepasse, login, adresse)
+        if result:
+            return {"status": "success", **result}
+        else:
+            raise HTTPException(status_code=500, detail="Échec de l'inscription")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'inscription: {str(e)}")
+    
 
 @router.post("/refresh")
 def refresh_token(refresh_token: str):
