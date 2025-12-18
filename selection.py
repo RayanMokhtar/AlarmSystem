@@ -180,7 +180,12 @@ pwd_context = CryptContext(
 import bcrypt
 
 def verifier_motdepasse(motdepasse_clair: str, motdepasse_hash: str) -> bool:
-    motdepasse_clair = motdepasse_clair[:72].encode("utf-8")  # 🔹 tronquer ici
-    motdepasse_hash = motdepasse_hash.encode("utf-8")
-    return bcrypt.checkpw(motdepasse_clair, motdepasse_hash)
+    try:
+        # Tentative de vérification Bcrypt
+        motdepasse_clair_enc = motdepasse_clair[:72].encode("utf-8")
+        motdepasse_hash_enc = motdepasse_hash.encode("utf-8")
+        return bcrypt.checkpw(motdepasse_clair_enc, motdepasse_hash_enc)
+    except Exception:
+        # Fallback : comparaison en clair si ce n'est pas un hash Bcrypt valide
+        return motdepasse_clair == motdepasse_hash
 

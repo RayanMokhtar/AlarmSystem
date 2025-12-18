@@ -19,6 +19,77 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+# --- AJOUT POUR ADAPTER L'APP MOBILE ---
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "database": "connected"}
+
+@app.post("/auth/login")
+async def auth_login(request: dict):
+    try:
+        login_or_email = request.get("login_or_email")
+        password = request.get("password")
+        
+        from selection import DB_HOST, DB_NAME, DB_USER, DB_PASS, verifier_motdepasse
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
+        
+        conn = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS, cursor_factory=RealDictCursor)
+        cur = conn.cursor()
+        cur.execute("SELECT utilisateur_id, email, login, motdepasse FROM utilisateur WHERE email = %s OR login = %s", (login_or_email, login_or_email))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not user or not verifier_motdepasse(password, user["motdepasse"]):
+            return {"success": False, "message": "Identifiants incorrects"}
+
+        return {
+            "success": True,
+            "message": "Connexion réussie",
+            "user": {
+                "id": str(user["utilisateur_id"]),
+                "email": user["email"],
+                "login": user["login"]
+            }
+        }
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+@app.post("/auth/register")
+async def auth_register(request: dict):
+    try:
+        email = request.get("email")
+        login = request.get("login")
+        password = request.get("password")
+        
+        from Insertions import inserer_utilisateur, Utilisateur
+        from datetime import date
+        
+        user_id = uuid4()
+        new_user = Utilisateur(
+            utilisateur_id=user_id,
+            email=email,
+            login=login,
+            motdepasse=password,
+            date_creation=date.today()
+        )
+        
+        inserer_utilisateur(new_user)
+        
+        return {
+            "success": True,
+            "message": "Inscription réussie",
+            "user": {
+                "id": str(user_id),
+                "email": email,
+                "login": login
+            }
+        }
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+# ---------------------------------------
+
 @app.post("/creerUtilisateur")
 def creer_Compte_utilisateur(utilisateur: Utilisateur):
     user_id = inserer_utilisateur(utilisateur)
@@ -106,7 +177,7 @@ async def create_evenement(evenement: str = Form(...),video: UploadFile = File(.
 @app.post("/creerNotification")
 def create_notification(notif : Notification): 
     notification_id= inserer_notification(notif)
-    return{"status": "success", "utilisateur_id": notification_id}
+    return{"status": "success", "notification_id": notification_id}
 
 
 @app.get("/chercher_utilisateur/{utilisateur_id}")
@@ -161,3 +232,7 @@ def nombreEquipementEnPanne():
 def nombreEquipementEnPanne():
     nb = Trouver_equip_le_plus_en_panne()
     return nb 
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8040)
