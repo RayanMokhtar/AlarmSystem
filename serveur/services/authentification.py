@@ -179,3 +179,7 @@ def inscrire_user(email: str, motdepasse: str, login: str, adresse: str):
     except Exception as e:
         print(f"Erreur générale: {e}")
         return None
+    
+
+
+

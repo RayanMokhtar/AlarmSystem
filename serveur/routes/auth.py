@@ -1,11 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Response, Query , Depends
 from uuid import UUID
 from jose import jwt, JWTError
 
 from serveur.configuration import CONFIG
 from serveur.models.db_models import LoginRequest
+from serveur.models.db_models import Notification
+
 from serveur.services.security import create_access_token, create_refresh_token, get_current_user
-from serveur.services.authentification import authenticate_user , inscrire_user
+from serveur.services.authentification import authenticate_user , inscrire_user 
+from serveur.services.event_publisher import creer_notification , get_notifications_from_user 
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -88,11 +92,44 @@ def refresh_token(refresh_token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Token de rafraîchissement invalide ou expiré")
 
+
 @router.get("/me")
-def get_me(current_user: UUID = get_current_user):
+def get_me(current_user: UUID = Depends(get_current_user)):  
     """
     Endpoint pour obtenir les informations de l'utilisateur actuel.
     
     Nécessite un token d'accès valide.
     """
     return {"user_id": str(current_user)}
+
+
+
+@router.post("/creer_notification")
+def creer_notification_route(data: Notification):
+    """
+    Route pour créer une notification via le service creer_notification.
+    """
+    try:
+        result = creer_notification(data)
+        if result:
+            return {"status": "success", "data": result}
+        else:
+            raise HTTPException(status_code=500, detail="Erreur lors de la création de la notification")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+
+@router.get("/notifications")
+def get_notifications(user_id: str = Query(...), filtre: bool = Query(True)):
+    """
+    Route pour récupérer les notifications d'un utilisateur via le service get_notifications_from_user.
+    - user_id: ID de l'utilisateur (requis).
+    - filtre: Si True, retourne seulement les notifications non vues. Si False, toutes.
+    """
+    try:
+        result = get_notifications_from_user(user_id, filtre)
+        if result is not None:
+            return {"status": "success", "notifications": result}
+        else:
+            raise HTTPException(status_code=500, detail="Erreur lors de la récupération des notifications")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")

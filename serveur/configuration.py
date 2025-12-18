@@ -73,10 +73,10 @@ class Security(BaseModel):
 class Configuration(BaseModel):
     model_config = SettingsConfigDict(env_file='.env', env_nested_delimiter='__')
     path_config: PathConfig = Field(PathConfig(), description="Configuration des chemins")
-    ai_config: YoloConfig = Field(YoloConfig(), description="Configuration du modèle AI YOLO")
+    ai_config: YoloConfig = Field(YoloConfig(), description="ConZfiguration du modèle AI YOLO")
     api_config: ApiConfig = Field(ApiConfig(), description="Config de l'API locale")
-    serveur_raspberry : ExternalApiConfig = Field(ExternalApiConfig(base_url="http://192.168.1.2:5000"), description="Config d'une API externe")
-    serveur_cloud : ExternalApiConfig = Field(ExternalApiConfig(base_url="http://10.231.151.22:8040"), description="Config du serveur cloud ")
+    serveur_raspberry : ExternalApiConfig = Field(ExternalApiConfig(base_url="http://10.12.241.189:5000"), description="Config d'une API externe")
+    serveur_cloud : ExternalApiConfig = Field(ExternalApiConfig(base_url="http://10.12.241.22:8040"), description="Config du serveur cloud ")
     securite : Security = Field(Security(),description="classe sécurité")
 
 def get_configuration(): 

@@ -63,6 +63,7 @@ class Notification(BaseModel):
     statut_notification: str
     message : str #la rapsberry en panne ..  /healthcheck qui passe pas , et intrusion 
     date_notification: datetime
+    notification_vue : bool
 
 class LoginRequest(BaseModel):
     email: EmailStr

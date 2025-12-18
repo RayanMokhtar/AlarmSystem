@@ -23,7 +23,8 @@ dependencies = [
     "av",
     "python-jose[cryptography]",
     "pydantic-settings",
-    "psycopg2-binary"     
+    "psycopg2-binary",
+    "prometheus_client"
 ]
 
 readme = "README.md"

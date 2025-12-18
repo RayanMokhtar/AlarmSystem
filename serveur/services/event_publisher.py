@@ -11,6 +11,8 @@ from fastapi import HTTPException
 from serveur.configuration import CONFIG
 from serveur.services.utils import YOLO_MODELE , _sanitize_filename
 from serveur.models.schemas import EventDataPublisher , AlerteRaspberry
+from serveur.models.db_models import Notification 
+
 
 """persistence des documents en requete post 
 
@@ -30,6 +32,7 @@ def construire_event_data(donnes_raspberry : AlerteRaspberry , resultat:dict,vid
     try:
         event_id = UUID(str(donnes_raspberry.event_id))
         appareil_id = UUID(str(donnes_raspberry.device_id))
+        print("appareil_id" , appareil_id)
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"ID invalid: {e}") from e
 
@@ -64,15 +67,19 @@ def construire_event_data(donnes_raspberry : AlerteRaspberry , resultat:dict,vid
 
 
 def envoyer_cloud_data(event_data:EventDataPublisher,video_path:str):
-    route_cloud = f"{CONFIG.serveur_cloud.base_url}/creerEvenement"
-    print("endpoint cloud = ",route_cloud)
-    event_data_model_verif = event_data.model_dump_json()#sérialisation directe
-    with open(video_path, "rb") as f:
-        files = {"video": ("event.mp4", f, "video/mp4")}
-        data = {"evenement": event_data_model_verif}
-        r = requests.post(url = route_cloud, files=files, data=data, timeout=120)
-        r.raise_for_status()
-        return r.json()
+    try : 
+        route_cloud = f"{CONFIG.serveur_cloud.base_url}/creerEvenement"
+        print("endpoint cloud = ",route_cloud)
+        event_data_model_verif = event_data.model_dump_json()#sérialisation directe
+        with open(video_path, "rb") as f:
+            files = {"video": ("event.mp4", f, "video/mp4")}
+            data = {"evenement": event_data_model_verif}
+            r = requests.post(url = route_cloud, files=files, data=data, timeout=120)
+            r.raise_for_status()
+            return r.json()
+    except Exception as e : 
+        print("erreur lors de l'insertion dans le cloud", str(e))
+        
 
     
     
@@ -118,12 +125,49 @@ def envoyer_raspberry_data(resultat_prediction):
 
 
 
-def get_healthcheck_raspberry():
+def get_last_raspberry_id_service():
     try :
-        url_rpi = f"{CONFIG.serveur_raspberry.base_url}/healthcheck"
+        url_rpi = f"{CONFIG.serveur_cloud.base_url}/get_last_raspberry_id"
         response = requests.get(url = url_rpi , timeout=10)
         response.raise_for_status()
         return response.json()
-    except requests.exceptions.RequestException as e :
+    except Exception as e : 
         print("erreur envoi serveur :", e)
+        return None
+
+
+def creer_notification(data: Notification):
+    try:
+        url = f"{CONFIG.serveur_cloud.base_url}/creerNotification"
+
+        response = requests.post(
+            url=url,
+            json=data.model_dump(), 
+            timeout=10
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print("erreur envoi serveur :", e)
+        return None
+    
+    
+def get_notifications_from_user(user_id: str , filtre : bool):
+    try:
+        url = f"{CONFIG.serveur_cloud.base_url}/chercher_notification"
+        params = {"utilisateur_id": str(user_id)}
+        response = requests.get(
+            url=url,
+            params=params,
+            timeout=10
+        )
+        response.raise_for_status()
+        resultat = response.json() 
+        if filtre:
+            return [r for r in resultat if not r.get("notification_vue", False)]
+        else:
+            return resultat
+
+    except requests.exceptions.RequestException as e:
+        print("erreur récupération notifications :", e)
         return None
