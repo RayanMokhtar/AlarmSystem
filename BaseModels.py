@@ -18,7 +18,7 @@ class Utilisateur(BaseModel):
     utilisateur_id: UUID
     email: EmailStr
     motdepasse: str
-    date_creation: date
+    date_creation: Optional[datetime] = None
     login : str
 
 class Lieu(BaseModel):
@@ -26,7 +26,7 @@ class Lieu(BaseModel):
     utilisateur_id: UUID
     nom: str
     adresse: str
-    date_creation: date
+    date_creation: Optional[datetime] = None
 
 class Appareil(BaseModel):
     appareil_id: UUID
@@ -34,7 +34,7 @@ class Appareil(BaseModel):
     nom: str
     type: str
     statut: str
-    date_creation: date
+    date_creation: Optional[datetime] = None
 
 class Equipement(BaseModel):
     equipement_id: UUID
@@ -42,14 +42,14 @@ class Equipement(BaseModel):
     nom: str
     type: str
     statut: str
-    date_creation: date
+    date_creation: Optional[datetime] = None
 
 class Evenement(BaseModel):
     evenement_id: UUID
     appareil_id: UUID
     date_evenement: datetime
     statut_alerte: bool
-    timestamp_serveur: datetime
+    timestamp_serveur: Optional[datetime] = None
     seuil_reponse_modele: float
     timestamp_rasp: datetime
     statut_camera: bool
@@ -63,13 +63,14 @@ class CreationRequest(BaseModel):
     appareil: Appareil
     equipement: Equipement
 
-class Notification(BaseModel):
+class Notification(BaseModel): 
     notification_id: UUID
-    utilisateur_id: UUID
-    evenement_id: Optional[UUID]
+    utilisateur_id: UUID 
+    evenement_id: Optional[UUID] # null
     statut_notification: str
+    message : str #la rapsberry en panne ..  /healthcheck qui passe pas , et intrusion 
     date_notification: datetime
-    message: str
+    notification_vue : bool
 
 class LoginRequest(BaseModel):
     email: EmailStr

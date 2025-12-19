@@ -151,6 +151,7 @@ async def create_evenement(evenement: str = Form(...),video: UploadFile = File(.
     # Convertir la string JSON en dict, puis en modèle Pydantic
     try : 
         evenement_data = json.loads(evenement)
+        print("evenement_data:",evenement_data)
         try : 
             evenement_obj = Evenement(**evenement_data)
         except Exception as e : 
@@ -160,10 +161,18 @@ async def create_evenement(evenement: str = Form(...),video: UploadFile = File(.
         print("evenement_obj",evenement_obj)
         evenement_id = insertion_evenement(evenement_obj)
         print("partie video : ")
-        out_path = f"videos_engistrées/{video.filename}"
-        with open(out_path, "wb") as f:
-            while chunk := await video.read(1024 * 1024):
-                f.write(chunk)
+        
+        # Sauvegarde de la vidéo avec gestion d'erreur
+        try:
+            out_path = f"videos_engistrées/{video.filename}_date_{evenement_obj.date_evenement.isoformat().replace(':', '-')}_id_{evenement_id}.mp4"
+            os.makedirs(os.path.dirname(out_path), exist_ok=True)
+            with open(out_path, "wb") as f:
+                while chunk := await video.read(1024 * 1024):
+                    f.write(chunk)
+            print(f"Vidéo sauvegardée : {out_path}")
+        except Exception as video_error:
+            print(f"Erreur lors de la sauvegarde vidéo : {str(video_error)}")
+            raise HTTPException(status_code=500, detail=f"Erreur sauvegarde vidéo : {str(video_error)}")
 
         return {
             "status": "success",
@@ -174,10 +183,26 @@ async def create_evenement(evenement: str = Form(...),video: UploadFile = File(.
     except Exception as e : 
         raise HTTPException(status_code=500,detail=f"erreur interne de serveur{str(e)}")
 
+
 @app.post("/creerNotification")
-def create_notification(notif : Notification): 
-    notification_id= inserer_notification(notif)
-    return{"status": "success", "notification_id": notification_id}
+def create_notification(notif : dict):
+    print("notif dict reçu:", notif)  # Ajout pour déboguer
+    try:
+        notif_obj = Notification(
+            notification_id=UUID(notif['notification_id']),
+            utilisateur_id=UUID(notif['utilisateur_id']),
+            evenement_id=UUID(notif['evenement_id']) if notif.get('evenement_id') else None,
+            statut_notification=notif['statut_notification'],
+            message=notif['message'],
+            date_notification=datetime.fromisoformat(notif['date_notification']),
+            notification_vue=notif['notification_vue']
+        )
+        print("notification reçue dans main ", notif_obj)
+        notification_id = inserer_notification(notif_obj)
+        return {"status": "success", "notification_id": notification_id}
+    except Exception as e:
+        print("Erreur :", str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get("/chercher_utilisateur/{utilisateur_id}")
@@ -198,14 +223,24 @@ def get_lieu(utilisateur_id: str):
 
     return lieu
 
-@app.get("/chercher_notification/{utilisateur_id}")
-def get_notification(utilisateur_id: str):
-    lieu = select_notification(utilisateur_id)
+@app.get("/chercher_notification")
+def get_notification(utilisateur_id: str, filtre: bool = False):
+    notif = select_notification(utilisateur_id, filtre)
 
-    if lieu is None:
-        raise HTTPException(status_code=404, detail="lieu introuvable")
+    if notif is None:
+        raise HTTPException(status_code=404, detail="notification introuvable")
+    return notif
 
-    return lieu
+@app.get("/notifsnonlues")
+def get_unread_notifications(utilisateur_id: str):
+    """
+    Récupère les notifications non vues et les marque comme vues.
+    """
+    try:
+        notif = select_notification_nonlue(utilisateur_id)
+        return notif
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/Connexion")
 def vérif_Connexion(data: LoginRequest):
@@ -232,6 +267,43 @@ def nombreEquipementEnPanne():
 def nombreEquipementEnPanne():
     nb = Trouver_equip_le_plus_en_panne()
     return nb 
+
+@app.get("/get_last_raspberry_id")
+def get_last_raspberry_id():
+    try:
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
+        
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASS,
+            cursor_factory=RealDictCursor
+        )
+        cur = conn.cursor()
+        
+        # Récupérer le dernier appareil_id (ordonné par appareil_id DESC)
+        cur.execute(
+            """
+            SELECT appareil_id
+            FROM appareil
+            ORDER BY date_creation DESC
+            LIMIT 1
+            """
+        )
+        
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Aucun appareil trouvé")
+        print("result:",result)
+        return {"appareil_id": str(result["appareil_id"])}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

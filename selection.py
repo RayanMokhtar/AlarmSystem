@@ -79,7 +79,8 @@ def select_lieu(utilisateur_id: str):
     
 
 
-def select_notification(utilisateur_id: str):
+def select_notification(utilisateur_id: str, filtre: bool = False):
+    print(f"DEBUG: select_notification called with utilisateur_id={utilisateur_id}, filtre={filtre}")
     try:
         conn = psycopg2.connect(
             host=DB_HOST,
@@ -90,32 +91,39 @@ def select_notification(utilisateur_id: str):
         )
         cur = conn.cursor()
 
-        cur.execute(
-                    """
-            SELECT
-            e.*,
-            n.*
-            FROM utilisateur u
-            LEFT JOIN notification n 
-            ON n.utilisateur_id = u.utilisateur_id
-            LEFT JOIN evenement e 
-            ON e.evenement_id = n.evenement_id
-            WHERE u.utilisateur_id = %s
-            """,
+        query = "SELECT * from notification WHERE utilisateur_id = %s"
+        if filtre:
+            query += " AND notification_vue = false"
+        
+        cur.execute(query, (utilisateur_id,))
 
-            (utilisateur_id,)
-        )
-
-        lieu = cur.fetchone()  
-
+        notif = cur.fetchall()
+        
+        # Si on filtre (uniquement les non vues), marquer seulement ces notifications comme vues
+        if filtre and notif:
+            print(f"DEBUG: Found {len(notif)} unread notifications to mark as viewed")
+            for notification in notif:
+                notification_id = notification['notification_id']
+                print(f"DEBUG: Marking notification {notification_id} as viewed")
+                update_query = "UPDATE notification SET notification_vue = true WHERE notification_id = %s"
+                cur.execute(update_query, (notification_id,))
+            conn.commit()
+            print(f"DEBUG: All updates committed")
+        
         cur.close()
         conn.close()
 
-        return lieu
+        return notif
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+
+def select_notification_nonlue(utilisateur_id: str):
+    """
+    Récupère les notifications non vues et les marque automatiquement comme vues.
+    """
+    return select_notification(utilisateur_id, filtre=True)
 def connexion_utilisateur(data: LoginRequest):
     try:
         conn = psycopg2.connect(

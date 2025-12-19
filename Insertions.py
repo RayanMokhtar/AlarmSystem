@@ -56,14 +56,13 @@ def inserer_utilisateur(data: Utilisateur):
         cur.execute(
             """
             INSERT INTO utilisateur (utilisateur_id, email, motdepasse, date_creation, login)
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s)
             RETURNING utilisateur_id
             """,
             (
                 str(data.utilisateur_id),
                 data.email,
                 motdepasse_hache,  
-                data.date_creation,
                 data.login
             )
         )
@@ -92,10 +91,10 @@ def inserer_lieu(data: Lieu):
         cur.execute(
             """
             INSERT INTO lieu (lieu_id, utilisateur_id, nom, adresse, date_creation)
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
             RETURNING lieu_id
             """,
-            (str(data.lieu_id), str(data.utilisateur_id), data.nom, data.adresse, data.date_creation)
+            (str(data.lieu_id), str(data.utilisateur_id), data.nom, data.adresse)
         )
         lieu_id = cur.fetchone()["lieu_id"]
         conn.commit()
@@ -118,10 +117,10 @@ def inserer_appareil(data: Appareil):
         cur.execute(
             """
             INSERT INTO appareil (appareil_id, lieu_id, nom, type, statut, date_creation)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
             RETURNING appareil_id
             """,
-            (str(data.appareil_id), str(data.lieu_id), data.nom, data.type, data.statut, data.date_creation)
+            (str(data.appareil_id), str(data.lieu_id), data.nom, data.type, data.statut)
         )
         appareil_id = cur.fetchone()["appareil_id"]
         conn.commit()
@@ -144,10 +143,10 @@ def inserer_equipement(data: Equipement):
         cur.execute(
             """
             INSERT INTO equipement (equipement_id, appareil_id, nom, type, statut, date_creation)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
             RETURNING equipement_id
             """,
-            (str(data.equipement_id), str(data.appareil_id), data.nom, data.type, data.statut, data.date_creation)
+            (str(data.equipement_id), str(data.appareil_id), data.nom, data.type, data.statut)
         )
         equipement_id = cur.fetchone()["equipement_id"]
         conn.commit()
@@ -171,7 +170,7 @@ def insertion_evenement(evenement: Evenement):
             cursor_factory=RealDictCursor
         )
         cur = conn.cursor()
-
+        print("Insertion evenement app id:", evenement.appareil_id)
         # Insérer l'événement
         cur.execute(
             """
@@ -180,7 +179,7 @@ def insertion_evenement(evenement: Evenement):
                 timestamp_serveur, seuil_reponse_modele, timestamp_rasp,
                 statut_camera, statut_capteur, emplacement_video_evenement, statut_boutton
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP, %s, %s, %s, %s, %s, %s)
             RETURNING evenement_id
             """,
             (
@@ -188,7 +187,6 @@ def insertion_evenement(evenement: Evenement):
                 str(evenement.appareil_id),
                 evenement.date_evenement,
                 evenement.statut_alerte,
-                evenement.timestamp_serveur,
                 evenement.seuil_reponse_modele,
                 evenement.timestamp_rasp,
                 evenement.statut_camera,
@@ -228,18 +226,19 @@ def insertion_evenement(evenement: Evenement):
                 utilisateur_id,
                 evenement_id,
                 statut_notification,
-                date_notification, 
+                date_notification,
+                notification_vue, 
                 message
             )
-            VALUES (%s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP, %s, %s)
             """,
             (
                 str(uuid4()),
                 str(utilisateur_id),
                 str(evenement_id),
+                "Alerte intrusion",
                 False,                 
-                evenement.date_evenement,
-                None
+                "Un intrus a été détecté chez vous !"
             )
         )
 
@@ -268,7 +267,7 @@ def inserer_notification(data: Notification):
             cursor_factory=RealDictCursor
         )
         cur = conn.cursor()
-
+        print("data recue dans inserer notification ",data)
         cur.execute(
             """
             INSERT INTO notification (
@@ -276,23 +275,26 @@ def inserer_notification(data: Notification):
                 utilisateur_id,
                 evenement_id,
                 statut_notification,
-                date_notification, 
+                date_notification,
+                notification_vue, 
                 message
             )
-            VALUES (%s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP, %s, %s)
             RETURNING notification_id
             """,
             (
-                str(data.notification_id),
+                str(uuid4()),
                 str(data.utilisateur_id),
-                None,
-                data.statut_notification,
-                data.date_notification,
-                data.message
+                str(data.evenement_id) if data.evenement_id else None,  # Gestion du None
+                str(data.statut_notification),
+                False,  # notification_vue forcé à False
+                str(data.message)
             )
         )
 
-        notification_id = cur.fetchone()["notification_id"]
+        result = cur.fetchone()
+        print("reultat dans fonction ",result)
+        notification_id = result["notification_id"] if result else None
         conn.commit()
 
         cur.close()
