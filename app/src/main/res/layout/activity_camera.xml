@@ -31,6 +31,75 @@
         android:background="#80000000"
         android:padding="8dp"/>
 
+    <!-- Directional Controls - Modern D-Pad Style -->
+    <FrameLayout
+        android:id="@+id/layoutDirectionalControls"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="100dp">
+
+        <!-- Background circle -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/dpad_background"/>
+
+        <!-- Up Button -->
+        <ImageButton
+            android:id="@+id/btnUp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="top|center_horizontal"
+            android:background="@drawable/dpad_button"
+            android:src="@drawable/ic_arrow_up"
+            android:scaleType="center"
+            android:contentDescription="Haut"/>
+
+        <!-- Down Button -->
+        <ImageButton
+            android:id="@+id/btnDown"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:background="@drawable/dpad_button"
+            android:src="@drawable/ic_arrow_down"
+            android:scaleType="center"
+            android:contentDescription="Bas"/>
+
+        <!-- Left Button -->
+        <ImageButton
+            android:id="@+id/btnLeft"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical|start"
+            android:background="@drawable/dpad_button"
+            android:src="@drawable/ic_arrow_left"
+            android:scaleType="center"
+            android:contentDescription="Gauche"/>
+
+        <!-- Right Button -->
+        <ImageButton
+            android:id="@+id/btnRight"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical|end"
+            android:background="@drawable/dpad_button"
+            android:src="@drawable/ic_arrow_right"
+            android:scaleType="center"
+            android:contentDescription="Droite"/>
+
+        <!-- Center circle (decorative) -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:background="@drawable/dpad_center"/>
+
+    </FrameLayout>
+
     <!-- Alert Overlay (Visible only when alert triggered) -->
     <LinearLayout
         android:id="@+id/layoutAlertActions"

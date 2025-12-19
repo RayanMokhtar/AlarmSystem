@@ -2,19 +2,14 @@ package com.example.homesecure;
 
 public class AlertHistoryItem {
 
-    public enum Classification {
-        CONFIRMED_ALERT,
-        FALSE_ALARM
-    }
-
     private final String alertId;
     private final String dateTime;
-    private final Classification classification;
+    private final String message;
 
-    public AlertHistoryItem(String alertId, String dateTime, Classification classification) {
+    public AlertHistoryItem(String alertId, String dateTime, String message) {
         this.alertId = alertId;
         this.dateTime = dateTime;
-        this.classification = classification;
+        this.message = message;
     }
 
     public String getAlertId() {
@@ -25,14 +20,7 @@ public class AlertHistoryItem {
         return dateTime;
     }
 
-    public Classification getClassification() {
-        return classification;
-    }
-
-    public String getClassificationLabel() {
-        if (classification == Classification.CONFIRMED_ALERT) {
-            return "Alerte confirmée";
-        }
-        return "Fausse alerte";
+    public String getMessage() {
+        return message;
     }
 }

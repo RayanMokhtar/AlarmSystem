@@ -33,13 +33,7 @@ public class AlertHistoryAdapter extends RecyclerView.Adapter<AlertHistoryAdapte
 
         holder.tvAlertId.setText(item.getAlertId());
         holder.tvAlertDateTime.setText(item.getDateTime());
-        holder.tvAlertClassification.setText(item.getClassificationLabel());
-
-        Context context = holder.itemView.getContext();
-        int colorRes = (item.getClassification() == AlertHistoryItem.Classification.CONFIRMED_ALERT)
-                ? R.color.green_success
-                : R.color.red_danger;
-        holder.tvAlertClassification.setTextColor(ContextCompat.getColor(context, colorRes));
+        holder.tvAlertMessage.setText(item.getMessage());
     }
 
     @Override
@@ -50,13 +44,13 @@ public class AlertHistoryAdapter extends RecyclerView.Adapter<AlertHistoryAdapte
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView tvAlertId;
         final TextView tvAlertDateTime;
-        final TextView tvAlertClassification;
+        final TextView tvAlertMessage;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvAlertId = itemView.findViewById(R.id.tvAlertId);
             tvAlertDateTime = itemView.findViewById(R.id.tvAlertDateTime);
-            tvAlertClassification = itemView.findViewById(R.id.tvAlertClassification);
+            tvAlertMessage = itemView.findViewById(R.id.tvAlertMessage);
         }
     }
 }

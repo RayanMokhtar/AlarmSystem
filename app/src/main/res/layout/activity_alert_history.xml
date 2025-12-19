@@ -76,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.30"
                     android:gravity="end"
-                    android:text="Classification"
+                    android:text="Message"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_light" />

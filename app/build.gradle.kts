@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.homesecure"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -44,6 +44,13 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
+    
+    // OkHttp pour le support WebSocket
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Note: L'authentification passe maintenant par l'API REST (auth_server.py)
+    // Plus besoin de JDBC qui ne fonctionne pas sur Android
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
