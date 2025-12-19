@@ -9,7 +9,7 @@ from prometheus_client import generate_latest, CONTENT_TYPE_LATEST, Counter, His
 from serveur.models.schemas import AlerteRaspberry
 from serveur.models.db_models import Notification
 from serveur.services.traitement_video import pipeline_traitement_data , visualiser_video_yolo_service
-from serveur.services.event_publisher import envoyer_cloud_data , construire_event_data , envoyer_raspberry_data , stockage_local_evenement , get_last_raspberry_id_service , creer_notification
+from serveur.services.event_publisher import envoyer_cloud_data , construire_event_data , envoyer_raspberry_data , stockage_local_evenement , get_last_raspberry_id_service , creer_notification , stockage_local_evenement_log
 from serveur.services.persistence import suppression_logs  
 from serveur.configuration import CONFIG
 
@@ -69,9 +69,8 @@ async def process_raspberry_alerte(
         response = envoyer_cloud_data(event_data,video_path = video_path)
         print("reponse json du cloud ... => ", response,"\n\n")
         
-
     print("log : insertion fichier en local")
-    emplacement_trace_locale = stockage_local_evenement(resultat= resultats_modele,data_raspi=metadata)
+    emplacement_trace_locale = stockage_local_evenement_log(resultat= resultats_modele,data_raspi=metadata)
     raspberry_data_reponse = envoyer_raspberry_data(resultats_modele) #temporaire à remplacer par al versionfianle
     return {"raspberry_data_reponse": raspberry_data_reponse, 
             "emplacement_trace_locale":emplacement_trace_locale , 

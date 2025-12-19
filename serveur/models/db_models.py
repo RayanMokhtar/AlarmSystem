@@ -1,10 +1,9 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from psycopg2.extras import RealDictCursor
 from uuid import UUID
 from typing import Optional, Literal
-
 
 app = FastAPI()
 
@@ -59,7 +58,7 @@ class CreationRequest(BaseModel):
 class Notification(BaseModel): 
     notification_id: UUID
     utilisateur_id: UUID 
-    evenement_id: Optional[UUID] # null
+    evenement_id: Optional[UUID] | None = None  # null
     statut_notification: str
     message : str #la rapsberry en panne ..  /healthcheck qui passe pas , et intrusion 
     date_notification: datetime

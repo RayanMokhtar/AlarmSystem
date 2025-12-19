@@ -8,7 +8,7 @@ from serveur.models.db_models import Notification
 
 from serveur.services.security import create_access_token, create_refresh_token, get_current_user
 from serveur.services.authentification import authenticate_user , inscrire_user 
-from serveur.services.event_publisher import creer_notification , get_notifications_from_user 
+from serveur.services.event_publisher import creer_notification , get_notifications_from_user , get_notifications_nonlues
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -131,5 +131,14 @@ def get_notifications(user_id: str = Query(...), filtre: bool = Query(True)):
             return {"status": "success", "notifications": result}
         else:
             raise HTTPException(status_code=500, detail="Erreur lors de la récupération des notifications")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+    
+    
+@router.get("/notifsnonlues")
+def get_notifications(utilisateur_id: str = Query(...)):
+    try:
+        result = get_notifications_nonlues(utilisateur_id)
+        return {"status":"success","notifications":result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")

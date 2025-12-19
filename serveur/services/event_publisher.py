@@ -109,6 +109,26 @@ def stockage_local_evenement(resultat : dict , data_raspi : AlerteRaspberry , no
 
 
 
+def stockage_local_evenement_log(resultat : dict , data_raspi : AlerteRaspberry , nom_fichier = None , type_log = "log_applicatif"):
+    """
+    Stockage des événements en une seule ligne JSON pour Loki (mono-ligne).
+    Format : 1 événement = 1 ligne JSON.
+    """
+    # data_raspi et resultat 
+    combined = {
+        "resultat": resultat,
+        "data_raspi": data_raspi.model_dump()
+    }
+    if nom_fichier is None:
+        nom_fichier = f"raspberry_modele_{type_log}_{datetime.datetime.now()}.log"
+        nom_fichier = _sanitize_filename(nom_fichier)
+    emplacement_fichier = CONFIG.path_config.logs_path / nom_fichier
+    with open(emplacement_fichier, "a", encoding="utf-8") as f:  
+        json_line = json.dumps(combined, ensure_ascii=False, default=str)
+        f.write(json_line + "\n") 
+    return emplacement_fichier
+
+
 def envoyer_raspberry_data(resultat_prediction):
     data = {
         "alerte_statut":resultat_prediction.get("dictionnaire_analyse").get("statut_alerte"),
@@ -138,11 +158,14 @@ def get_last_raspberry_id_service():
 
 def creer_notification(data: Notification):
     try:
+        print("création notification avec data", data)
         url = f"{CONFIG.serveur_cloud.base_url}/creerNotification"
-
+        print("cration de la notification")
+        json_data = data.model_dump(mode="json")
+        print("json_data", json_data)
         response = requests.post(
             url=url,
-            json=data.model_dump(), 
+            json=json_data, 
             timeout=10
         )
         response.raise_for_status()
@@ -167,6 +190,24 @@ def get_notifications_from_user(user_id: str , filtre : bool):
             return [r for r in resultat if not r.get("notification_vue", False)]
         else:
             return resultat
+
+    except requests.exceptions.RequestException as e:
+        print("erreur récupération notifications :", e)
+        return None
+    
+
+def get_notifications_nonlues(utilisateur_id: str):
+    try:
+        url = f"{CONFIG.serveur_cloud.base_url}/notifsnonlues"
+        params = {"utilisateur_id": str(utilisateur_id)}
+        response = requests.get(
+            url=url,
+            params=params,
+            timeout=10
+        )
+        response.raise_for_status()
+        resultat = response.json() 
+        return resultat
 
     except requests.exceptions.RequestException as e:
         print("erreur récupération notifications :", e)
