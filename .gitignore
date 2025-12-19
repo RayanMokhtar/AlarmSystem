@@ -4,3 +4,4 @@ videos/
 *.mp4
 *.avi
 *.mov
+.env

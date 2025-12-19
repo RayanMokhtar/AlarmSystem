@@ -4,8 +4,13 @@ import psycopg2
 from pydantic import BaseModel, EmailStr
 from psycopg2.extras import RealDictCursor
 from uuid import UUID
+import os
+from dotenv import load_dotenv
 
-DB_HOST = "postgresql-hammal.alwaysdata.net"
-DB_NAME = "hammal_atelierrt"
-DB_USER = "hammal"
-DB_PASS = "Zahrdin.99"
+# Charger les variables d'environnement depuis le fichier .env
+load_dotenv()
+
+DB_HOST = os.getenv("DB_HOST")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")

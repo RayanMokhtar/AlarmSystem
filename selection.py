@@ -6,11 +6,7 @@ from psycopg2.extras import RealDictCursor
 from uuid import UUID
 from passlib.context import CryptContext
 from BaseModels import LoginRequest, Notification
-
-DB_HOST = "postgresql-hammal.alwaysdata.net"
-DB_NAME = "hammal_atelierrt"
-DB_USER = "hammal"
-DB_PASS = "Zahrdin.99"
+from ConnexionBDD import DB_HOST, DB_NAME, DB_USER, DB_PASS
 
 
 def select_utilisateur(utilisateur_id: str):

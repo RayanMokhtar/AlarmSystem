@@ -6,11 +6,7 @@ import psycopg2
 from pydantic import BaseModel, EmailStr
 from psycopg2.extras import RealDictCursor
 from uuid import UUID
-
-DB_HOST = "postgresql-hammal.alwaysdata.net"
-DB_NAME = "hammal_atelierrt"
-DB_USER = "hammal"
-DB_PASS = "Zahrdin.99"
+from ConnexionBDD import DB_HOST, DB_NAME, DB_USER, DB_PASS
 
 app = FastAPI()
 
