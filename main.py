@@ -305,6 +305,42 @@ def get_last_raspberry_id():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+@app.get("/healthCheckCloud")
+def health_check_cloud():
+    
+    try:
+        # Vérification de la connexion à la base de données
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASS,
+            cursor_factory=RealDictCursor
+        )
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if result is None:
+            raise HTTPException(status_code=500, detail="Impossible de récupérer un résultat de la base")
+        
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "cloud_server": "online"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur de connexion à la base : {str(e)}")
+
+
+
+    
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8040)
