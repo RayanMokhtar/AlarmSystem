@@ -67,6 +67,6 @@ class Notification(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     motdepasse: str
-
+    
 
 
