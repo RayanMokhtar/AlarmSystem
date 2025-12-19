@@ -99,6 +99,7 @@ def stockage_local_evenement(resultat : dict , data_raspi : AlerteRaspberry , no
         "resultat": resultat,
         "data_raspi": data_raspi.model_dump()
     }
+    print("combined : ",combined)
     if nom_fichier is None:
         nom_fichier = f"raspberry_modele_{type_log}_{datetime.datetime.now()}.json"
         nom_fichier = _sanitize_filename(nom_fichier)

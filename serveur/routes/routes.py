@@ -51,6 +51,7 @@ async def process_raspberry_alerte(
         raise HTTPException(status_code=400, detail=f"les json entré n'est pas valide {str(e)}")
     try:
         metadata = AlerteRaspberry.model_validate(metadata_dict)
+        print("model valid",metadata)
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Données invalide selon la schéma doit être de forme  {str(e)}")
 
@@ -70,6 +71,7 @@ async def process_raspberry_alerte(
         print("reponse json du cloud ... => ", response,"\n\n")
         
     print("log : insertion fichier en local")
+    _ = stockage_local_evenement(resultat= resultats_modele,data_raspi=metadata)
     emplacement_trace_locale = stockage_local_evenement_log(resultat= resultats_modele,data_raspi=metadata)
     raspberry_data_reponse = envoyer_raspberry_data(resultats_modele) #temporaire à remplacer par al versionfianle
     return {"raspberry_data_reponse": raspberry_data_reponse, 

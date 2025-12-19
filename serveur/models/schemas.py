@@ -6,18 +6,18 @@ from pathlib import Path
 from uuid import UUID
 
 class CameraConfig(BaseModel):
-    mode: Literal["eco", "surveillance"] = "eco"
-    statut: Literal["actif", "inactif"] = "actif"
+    mode: str = "eco"
+    statut: str
     seuil: float
 
 class CapteurTemperatureConfig(BaseModel):
-    mode: Literal["seuil", "autre"] = "seuil"
-    statut: Literal["actif", "inactif"] = "actif" 
+    mode: str = "seuil"
+    statut: str 
     seuil: float
 
 class BoutonConfig(BaseModel):
-    mode: Literal["manuel", "autre"] = "manuel"
-    statut: Literal["actif", "inactif"] = "actif"
+    mode: str = "manuel"
+    statut: str
     seuil: Optional[float] = None
 
 class Equipements(BaseModel):
