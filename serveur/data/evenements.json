@@ -1,0 +1,15 @@
+{
+  "event_id": "550e8400-e29b-41d4-a716-446655440000", 
+  "timestamp_raspberry": "2025-12-16T15:02:28.940Z",
+  "device_id": "43c6cf82-a8ef-41d3-9cbc-104d12eb1be8", 
+  "data": {
+    "alerte_potentielle": true,
+    "equipements": {
+      "camera": { "mode": "eco", "statut": "actif", "seuil": 0.8 },
+      "capteur_temperature": { "mode": "seuil", "statut": "actif", "seuil": 0 },
+      "bouton": { "mode": "manuel", "statut": "actif", "seuil": null }
+    },
+    "image_b64": null,
+    "video_info": { "nom_fichier": "event.mp4", "duree": 10, "resolution": "640x480", "fps": 30 }
+  }
+}
